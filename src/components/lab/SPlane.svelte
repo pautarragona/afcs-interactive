@@ -112,7 +112,7 @@
     </g>
   {/each}
 
-  <text class="label num" x={Math.min(px + 20, 190)} y={Math.max(pyUp - 12, 34)}>{poleText}</text>
+  <text class="label num" x={px + 108 < x(0) ? px + 20 : px - 20} text-anchor={px + 108 < x(0) ? 'start' : 'end'} y={Math.max(pyUp - 16, 34)}>{poleText}</text>
   <text class="zone bad" x={x(0) + 4} y={Y0 + H - 6}>unstable</text>
   {#if showTarget}<text class="zone spec" x={X0 + 5} y={Y0 + 14}>spec met</text>{/if}
   <g class="ticks num">
