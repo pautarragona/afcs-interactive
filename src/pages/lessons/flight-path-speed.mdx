@@ -1,0 +1,71 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Flight path and speed
+description: "Deeper, lesson 10. Why elevator alone cannot control both flight path and speed, and how an energy view assigns thrust and elevator to the jobs they do best."
+slug: flight-path-speed
+---
+
+import EnergyLab from '../../components/labs/EnergyLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">The autopilots of lesson 8 assumed an autothrottle quietly held the speed. Take that away and a basic fact of flight appears: the elevator does not add energy, it only redistributes it. Ask for a climb with the elevator alone and the aircraft pays for the height with speed. This lesson makes that visible and shows how modern flight path and speed controllers split the work.</p>
+
+By the end you should be able to:
+
+- explain, with an energy argument, why a climb at constant thrust costs speed;
+- write the specific energy rate and identify which control changes it;
+- describe the idea behind total energy control, used in many modern autopilots.
+
+<h2 class="sec" id="s1"><span class="n">10.1</span>The point-mass equations</h2>
+
+For flight path and speed, the rotational dynamics of lessons 5 to 8 can be treated as fast. What remains is a point mass moving along its path:
+
+<Equation n="10.1" tex="\frac{\dot V}{g} = \frac{T - D}{W} - \sin\gamma, \qquad \dot h = V\sin\gamma" />
+
+The elevator changes the flight path angle <M t="\gamma" /> through the inner loops. The throttle changes the thrust <M t="T" />. Look at the first equation: a steeper flight path at unchanged thrust and drag makes <M t="\dot V" /> negative.
+
+<h2 class="sec" id="s2"><span class="n">10.2</span>The energy view</h2>
+
+Combine the two equations into the total energy per unit weight, <M t="E/W = h + V^2/(2g)" />. Its rate of change is
+
+<Equation n="10.2" tex="\frac{\dot E}{W\,V} = \sin\gamma + \frac{\dot V}{g} = \frac{T - D}{W}" />
+
+The right-hand side contains only thrust and drag. The elevator does not appear: it can trade speed for flight path, but it cannot change the total. Only thrust can. That is the whole problem with controlling speed and flight path through one control.
+
+<div class="bench-wrap"><EnergyLab client:load /></div>
+
+With the elevator alone, the commanded climb is flown, at first: the aircraft converts kinetic energy into height, and the speed keeps falling until the drag has dropped enough to balance thrust and weight on the new path. For a 3° climb in this illustrative model that equilibrium lies below the stall. Switch to elevator plus thrust: the throttle supplies the extra energy rate the climb needs, and the speed hardly moves. Slow the engine down and watch the speed dip at the start, until the thrust catches up.
+
+<QuickCheck client:idle id="qc-energy" question="An aircraft at constant thrust is commanded from level flight into a 2° climb. Which statement is true?" options={[
+  { text: 'It loses speed until drag has fallen enough to balance the new path', correct: true, why: 'By (10.2) the total energy rate is fixed by T − D. Adding sin γ > 0 at the same T − D forces V̇ < 0, until D drops with speed.' },
+  { text: 'It keeps its speed, because the autopilot holds the flight path', why: 'Holding γ is exactly what forces the speed change: the elevator can only redistribute energy between height and speed.' },
+  { text: 'It gains speed, because the nose is higher', why: 'A higher nose at the same thrust converts kinetic energy into height, so speed falls.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">10.3</span>Assigning the controls</h2>
+
+Equation (10.2) suggests a natural split, used in total energy control systems (TECS):
+
+- the **throttle** controls the total energy rate, <M t="\sin\gamma + \dot V/g" />, because only thrust changes it;
+- the **elevator** controls the distribution, <M t="\sin\gamma - \dot V/g" />, trading between height and speed.
+
+The bench's thrust law is a simple version of the first rule: it sets <M t="T/W" /> to the current drag plus <M t="\sin\gamma_c" /> plus a correction for the speed error, so the engine supplies the energy rate the commanded path needs. A full TECS also lets the elevator act on speed errors, so that climbs and speed changes are coordinated rather than fought over by two separate loops.
+
+<QuickCheck client:idle id="qc-split" question="In a total energy controller, which control mainly responds to a combined error 'too low and too slow'?" options={[
+  { text: 'The throttle, because both errors are an energy deficit', correct: true, why: 'Too low and too slow means total energy is short; only thrust can add energy. The elevator handles errors in how the energy is distributed.' },
+  { text: 'The elevator, because altitude errors belong to the elevator', why: 'If the elevator pulled up, it would make the speed error worse. The deficit in total energy needs thrust.' },
+  { text: 'Neither: the two errors cancel', why: 'They add up: both height and speed are below target, so both parts of the energy are missing.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">10.4</span>The back side of the drag curve</h2>
+
+There is one more trap. At low speed, induced drag dominates and drag increases as speed decreases. On this "back side" of the drag curve, a speed loss raises drag, which costs more speed, and holding a flight path with the elevator alone becomes unstable in speed. This is why approach autopilots rely on an autothrottle, and why pilots are taught to control speed with pitch and path with power when flying slowly. The bench's model includes only parasite drag, so it shows the front-side behaviour; the back side makes the elevator-only case even worse.
+
+<h2 class="sec" id="s5"><span class="n">10.5</span>In short</h2>
+
+- At constant thrust, a steeper flight path must cost speed: <M t="\sin\gamma + \dot V/g = (T-D)/W" />.
+- The elevator redistributes energy between height and speed; only thrust changes the total.
+- Total energy control assigns the total to the throttle and the distribution to the elevator.
+- On the back side of the drag curve, speed control through the elevator alone becomes unstable.

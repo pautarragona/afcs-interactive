@@ -53,7 +53,7 @@
       <Plot xRange={[0, TE]} yRange={[-0.2, Math.max(6, Math.max(...theta) * 1.1)]} xLabel="t [s]" yLabel="θ [°], q [°/s]" unitX="s" ariaLabel="Pitch rate and attitude, stick held then released"
         series={[{ x: q.t, y: q.y, kind: 'spec' }, { x: q.t, y: theta, kind: 'ink' }]}
         vbands={[{ from: 0, to: REL, kind: 'grab' }]} hlines={[{ at: thRel, kind: 'muted', label: 'attitude at release' }]} />
-      <figcaption><b>Fig. 7.2</b> Stick held for 4 s (orange band) then released. Blue: pitch rate, steady value 1 °/s. Black: pitch attitude; watch it after release.</figcaption>
+      <figcaption><b>Fig. 7.2</b> Stick held for 4 s (orange band) then released. Blue: pitch rate, steady value 1 °/s. <span class="c-ink"></span>: pitch attitude; watch it after release.</figcaption>
     </figure>
   </div>
   <div class="row" style="margin-top: 14px; align-items: stretch">

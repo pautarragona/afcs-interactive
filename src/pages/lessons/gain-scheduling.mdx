@@ -1,0 +1,68 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Gain scheduling
+description: "Deeper, lesson 11. Why a controller tuned at one flight condition drifts at others, how stability derivatives scale with airspeed, and how scheduling the gains keeps the closed loop the same."
+slug: gain-scheduling
+---
+
+import ScheduleLab from '../../components/labs/ScheduleLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Every design in this course was done on a linear model at one trim point, and lesson B warned that the model only holds nearby. An aircraft, however, flies over a wide range of speeds and altitudes. Gain scheduling is the classic, still widely used answer: design at several points, and let the gains change with the flight condition.</p>
+
+By the end you should be able to:
+
+- explain how the stability and control derivatives change with dynamic pressure and airspeed;
+- predict how a fixed-gain damper behaves away from its design point;
+- derive a simple schedule that keeps the closed-loop damping constant.
+
+<h2 class="sec" id="s1"><span class="n">11.1</span>Derivatives depend on the flight condition</h2>
+
+Aerodynamic forces and moments scale with dynamic pressure <M t="\bar q = \tfrac12\rho V^2" />. Dividing by mass, inertia and speed where the definitions require it gives, at constant air density and for a given aircraft,
+
+<Equation n="11.1" tex="M_\alpha,\ M_\delta \propto V^2, \qquad Z_\alpha,\ M_q \propto V" />
+
+The moment derivatives grow with the square of speed; the ones that describe damping or path response grow linearly. The aircraft becomes stiffer, more responsive and more effective in control as it speeds up, and the short-period frequency of lesson 5 grows roughly in proportion to speed.
+
+<h2 class="sec" id="s2"><span class="n">11.2</span>A fixed gain drifts</h2>
+
+Take the pitch damper of lesson 6 with a fixed gain <M t="K_q" />. The closed-loop pitch damping is <M t="M_q + M_\delta K_q" />, and by (11.1) the two terms scale differently: the aircraft's own damping as <M t="V" />, the damper's contribution as <M t="V^2" />. As speed rises the damper's share grows, and the closed loop becomes more and more damped; as speed drops it fades, and the aircraft's original, weaker damping returns.
+
+<div class="bench-wrap"><ScheduleLab client:load /></div>
+
+Move the speed away from 100 m/s and follow the black curve: the damping drifts steadily away from the design value. In a real aircraft the effect is stronger still, because air density also changes with altitude and actuator and sensor lags make a high-gain loop at high dynamic pressure lose phase margin.
+
+<QuickCheck client:idle id="qc-drift" question="A pitch damper with a fixed gain is tuned at 100 m/s. What happens to the damper's contribution MδKq at 200 m/s, at the same air density?" options={[
+  { text: 'It becomes four times larger', correct: true, why: 'Mδ scales with V², so doubling the speed quadruples MδKq, while the aircraft’s own Mq only doubles.' },
+  { text: 'It doubles', why: 'That is how Mq scales. The control derivative Mδ scales with dynamic pressure, so with V².' },
+  { text: 'It stays the same, because the gain is fixed', why: 'The gain is fixed, but the elevator’s effectiveness Mδ is not.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">11.3</span>Scheduling the gain</h2>
+
+The fix is to make the damper's contribution scale the same way as the aircraft's own damping. With <M t="M_\delta \propto V^2" /> and <M t="M_q \propto V" />, a gain
+
+<Equation n="11.2" tex="K_q(V) = K_{q_0}\,\frac{V_0}{V}" />
+
+gives <M t="M_\delta K_q \propto V" />, and the whole short-period characteristic equation scales uniformly: the frequency still grows with speed, but the damping ratio stays at its design value. The blue curve in the bench is flat for exactly that reason.
+
+In practice the schedule is not derived from a formula but from designs at a grid of flight conditions, with the gains interpolated in between, scheduled on measured quantities such as dynamic pressure, Mach number and altitude. Slow schedules on slowly varying quantities are well understood; scheduling on fast-changing variables can break the assumptions behind it and needs more care.
+
+<QuickCheck client:idle id="qc-sched" question="Why does the schedule Kq ∝ 1/V keep the short-period damping ratio constant in this model?" options={[
+  { text: 'It makes every term of the characteristic equation scale consistently with V', correct: true, why: 'With MδKq ∝ V like Mq and Zα, the damping term scales with V and the frequency term with V², so ζ = (damping term)/(2ω) is unchanged.' },
+  { text: 'It keeps the closed-loop poles in the same place', why: 'The poles move further from the origin as V grows; only their angle, and therefore ζ, stays the same.' },
+  { text: 'It keeps the elevator deflection constant', why: 'The deflection per unit pitch rate shrinks with speed; what stays constant is the ratio between the damper’s and the aircraft’s damping.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">11.4</span>Beyond scheduling</h2>
+
+Gain scheduling works well when the plant changes slowly and predictably. Its weak points are the number of design points needed, the behaviour between them, and changes that are not captured by the scheduling variables, such as damage or icing. Lesson 12 looks at a different approach, incremental nonlinear dynamic inversion, which reduces the dependence on an accurate model of how the derivatives vary.
+
+<h2 class="sec" id="s5"><span class="n">11.5</span>In short</h2>
+
+- Moment derivatives scale with dynamic pressure (<M t="\propto V^2" />), damping derivatives with <M t="V" />.
+- A fixed feedback gain therefore gives a closed loop that changes across the envelope.
+- Scheduling <M t="K_q \propto 1/V" /> keeps the short-period damping ratio constant in this model.
+- Real schedules interpolate between designs at many flight conditions.

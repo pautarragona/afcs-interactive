@@ -35,7 +35,7 @@
       </div>
       <Readout cells={[
         { label: 'Eigenvalues', value: eig.length === 2 && Math.abs(eig[0].im) > 1e-9 ? `${f(eig[0].re)} ± j${Math.abs(eig[0].im).toFixed(2)}` : eig.map((e) => f(e.re)).join(', '), state: stable ? '' : 'bad', sub: stable ? 'stable' : 'unstable' },
-        { label: 'Damping', sym: 'ζ', value: Number.isFinite(zeta) && zeta < 1 && zeta > 0 ? zeta.toFixed(2) : '—', sub: `ω_n = ${Number.isFinite(wn) ? wn.toFixed(2) : '—'} rad/s` },
+        { label: 'Damping', sym: 'ζ', value: Number.isFinite(zeta) && zeta < 1 && zeta > 0 ? zeta.toFixed(2) : '—', sub: `ωn = ${Number.isFinite(wn) ? wn.toFixed(2) : '—'} rad/s` },
       ]} />
     </div>
     <figure class="side" style="max-width: 300px">
@@ -45,7 +45,7 @@
     <figure class="grow">
       <Plot xRange={[0, T]} yRange={[-6, 6]} xLabel="t [s]" yLabel="α [°], q [°/s]" unitX="s" ariaLabel="Free response from an initial angle of attack of 2 degrees"
         series={[{ x: sim.t, y: sim.a, kind: 'ink' }, { x: sim.t, y: sim.q, kind: 'spec' }]} hlines={[{ at: 0, kind: 'muted', dash: false }]} />
-      <figcaption><b>Fig. B.3</b> Free motion after a 2° gust in angle of attack. Black: <i>α</i>. Blue: <i>q</i>.</figcaption>
+      <figcaption><b>Fig. B.3</b> Free motion after a 2° gust in angle of attack. <span class="c-ink"></span>: <i>α</i>. Blue: <i>q</i>.</figcaption>
     </figure>
   </div>
 </Sheet>

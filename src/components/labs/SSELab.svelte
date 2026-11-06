@@ -39,7 +39,7 @@
     <figure class="grow">
       <Plot xRange={[0, T_END]} yRange={input === 'step' ? [-0.1, 1.8] : undefined} xLabel="t [s]" yLabel="r(t), y(t)" unitX="s" ariaLabel="Reference and output"
         series={[{ x: sim.t, y: ref, kind: 'spec', dash: true }, { x: sim.t, y: sim.y, kind: stable ? 'ink' : 'bad' }]} />
-      <figcaption><b>Fig. 2.1</b> Blue dashed: reference. Black: output of the closed loop.</figcaption>
+      <figcaption><b>Fig. 2.1</b> Blue dashed: reference. <span class="c-ink"></span>: output of the closed loop.</figcaption>
     </figure>
     <figure class="grow">
       <Plot xRange={[0, T_END]} yRange={stable ? [Math.min(-0.2, ...err.slice(40)) , Math.max(1.05, Math.min(5, Math.max(...err)))] : [-3, 3]} xLabel="t [s]" yLabel="e(t) = r − y" unitX="s" ariaLabel="Tracking error"

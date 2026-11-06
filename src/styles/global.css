@@ -40,3 +40,8 @@ h1, h2, h3 { text-wrap: balance; font-family: var(--font-ui); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* Caption name for the ink colour: black on paper, white in dark mode */
+.c-ink::before { content: 'Black'; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .c-ink::before { content: 'White'; } }
+:root[data-theme='dark'] .c-ink::before { content: 'White'; }

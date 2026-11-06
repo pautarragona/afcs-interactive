@@ -40,7 +40,7 @@
     <figure class="grow">
       <Plot xRange={[0, T]} yRange={[0, Math.max(...bare.q) * 1.1]} xLabel="t [s]" yLabel="q [°/s]" unitX="s" ariaLabel="Pitch rate after a one-degree stick step"
         series={[{ x: bare.t, y: bare.q, kind: 'ghost' }, { x: aug.t, y: aug.q }]} hlines={[{ at: qss(Kq), kind: 'spec', label: 'steady state' }]} />
-      <figcaption><b>Fig. 6.2</b> Pitch rate after a 1° elevator step. Grey: bare aircraft. Black: with the damper.</figcaption>
+      <figcaption><b>Fig. 6.2</b> Pitch rate after a 1° elevator step. Grey: bare aircraft. <span class="c-ink"></span>: with the damper.</figcaption>
     </figure>
   </div>
   <div class="row" style="margin-top: 14px; align-items: stretch">

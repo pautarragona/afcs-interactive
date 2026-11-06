@@ -1,0 +1,73 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Actuator limits and integrator windup
+description: "Deeper, lesson 9. What happens to a carefully designed linear loop when the actuator saturates or cannot move fast enough, and how anti-windup keeps an integrator under control."
+slug: actuator-limits-windup
+---
+
+import WindupLab from '../../components/labs/WindupLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Every design so far assumed that the elevator does exactly what the controller asks. Real actuators have a maximum deflection and a maximum speed. Inside those limits the linear theory holds; outside them, a loop that was perfectly stable on paper can overshoot wildly or oscillate. This lesson shows the most common way that happens, integrator windup, and the standard fix.</p>
+
+By the end you should be able to:
+
+- explain what position and rate saturation do to a feedback loop;
+- recognise integrator windup in a time response and explain its mechanism;
+- describe clamping anti-windup and why it works.
+
+<h2 class="sec" id="s1"><span class="n">9.1</span>Two kinds of limit</h2>
+
+An electro-hydraulic or electromechanical actuator is usually modelled as a fast first-order lag with two nonlinearities:
+
+- **position saturation**: the surface cannot go beyond its stops, <M t="|u| \le u_{max}" />;
+- **rate saturation**: it cannot move faster than <M t="|\dot u| \le \dot u_{max}" />, set by the hydraulic flow or motor power.
+
+While neither limit is reached, the loop is linear and everything from lessons 1 to 8 applies. Once one is reached, the actuator stops responding to further increases in the command, and the loop is effectively opened: the controller's output no longer affects the aircraft.
+
+<h2 class="sec" id="s2"><span class="n">9.2</span>Integrator windup</h2>
+
+Opening the loop is bad for any controller, but worst for one with an integrator. A PI controller
+
+<Equation n="9.1" tex="u_c = K_p\left(e + \frac{1}{T_i}\int e\,dt\right)" />
+
+keeps integrating the error for as long as it lasts. If the actuator is saturated, the error shrinks more slowly than the linear design expected, so the integral grows far larger than it would have. When the output finally reaches the target, the integrator is still full, and it holds the actuator at its stop well past the target: a large overshoot, followed by a slow unwinding.
+
+<div class="bench-wrap"><WindupLab client:load /></div>
+
+The bench is a speed loop: a PI autothrottle (<M t="K_p = 4" />, <M t="T_i = 2" /> s) drives a slow first-order response with a 5 s time constant, much like airspeed responding to thrust. With an unlimited actuator it overshoots by about 11 %. Now look at the default limit: the command asks for several times more thrust than the engine can give, the orange actuator sits at its limit, the integrator fills up, and the overshoot roughly triples while the settling time doubles. Raise the limit and the curves come back together; lower it below the requested change and the target can never be reached at all.
+
+Lowering the rate limit adds a different problem: the actuator lags further and further behind fast commands, which acts like extra, amplitude-dependent delay. In flight control loops that is the mechanism behind several pilot-induced oscillation incidents in early fly-by-wire aircraft.
+
+<QuickCheck client:idle id="qc-wind" question="Why does a saturated actuator cause more overshoot in a loop with an integrator than in a purely proportional loop?" options={[
+  { text: 'The integrator keeps accumulating error while the actuator is stuck, and must unwind after the target is passed', correct: true, why: 'A proportional term drops back as soon as the error shrinks. The integral only shrinks once the error changes sign, so it holds the actuator at its stop past the target.' },
+  { text: 'Proportional loops cannot saturate', why: 'They can, and do; they simply recover as soon as the error falls, because they have no memory.' },
+  { text: 'The integrator adds phase lead', why: 'An integrator adds phase lag. Windup is a nonlinear effect of that memory, not a phase effect.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">9.3</span>Anti-windup by clamping</h2>
+
+The fix is to stop the integrator from accumulating while it can have no effect. The simplest scheme, **clamping** or conditional integration, freezes the integrator whenever the actuator is saturated and the error would push it further into saturation:
+
+<Equation n="9.2" tex="\dot I = \begin{cases} 0 & \text{if } |u_c| > u_{max} \text{ and } \operatorname{sign}(e) = \operatorname{sign}(u_c)\\ e & \text{otherwise}\end{cases}" />
+
+Switch it on in the bench: the overshoot drops back close to the unlimited design, because the integrator now holds only what it needs. Other schemes feed the difference between commanded and actual actuator position back into the integrator (back-calculation); all share the same idea of telling the controller what the actuator really did.
+
+<QuickCheck client:idle id="qc-aw" question="Clamping freezes the integrator only when the error has the same sign as the command. Why not freeze it whenever the actuator is saturated?" options={[
+  { text: 'So the integrator can still unwind when the error reverses, bringing the actuator off its stop sooner', correct: true, why: 'If the error has changed sign, integrating it pulls the command back towards the limit; freezing then would keep the actuator saturated for longer.' },
+  { text: 'Because freezing it always would make the loop unstable', why: 'It would not make it unstable, but it would slow recovery once the error reverses.' },
+  { text: 'There is no reason; both versions behave identically', why: 'They differ exactly in the phase where the error has reversed but the actuator is still saturated.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">9.4</span>In practice</h2>
+
+Flight control laws are always tested with actuator limits included, at the largest inputs pilots and autopilots can produce, not only with small linear steps. Rate limits deserve special care because they add a phase lag that grows with input amplitude, which linear margins (lesson 4) cannot see. Common counter-measures are anti-windup on every integrator, command shaping that keeps requests within what the actuators can do, and rate-limit-aware filters.
+
+<h2 class="sec" id="s5"><span class="n">9.5</span>In short</h2>
+
+- Actuators saturate in position and in rate; when they do, the loop is effectively open.
+- An integrator keeps accumulating error during saturation and causes large overshoot afterwards: windup.
+- Clamping anti-windup freezes the integrator while saturation is being driven deeper.
+- Rate saturation adds amplitude-dependent lag and can trigger oscillations that linear margins do not predict.

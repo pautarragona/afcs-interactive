@@ -1,0 +1,76 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Classical control versus INDI
+description: "Deeper, lesson 12. Incremental nonlinear dynamic inversion: how it uses measured accelerations to need less of a model, what it is robust to, and what it is not."
+slug: classical-vs-indi
+---
+
+import IndiLab from '../../components/labs/IndiLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Classical flight control, as in this course, designs fixed or scheduled gains on linear models. Incremental nonlinear dynamic inversion, INDI, takes a different route: instead of modelling everything that acts on the aircraft, it measures the resulting acceleration and only models how a control surface changes it. The approach has been researched extensively at TU Delft, among other places, and flown on aircraft from small drones to full-scale research aircraft.</p>
+
+By the end you should be able to:
+
+- explain the idea of dynamic inversion and why plain inversion needs an accurate model;
+- derive the incremental control law and say which model information it still needs;
+- describe, from the bench, where INDI beats a fixed-gain controller and where it does not.
+
+<h2 class="sec" id="s1"><span class="n">12.1</span>Dynamic inversion</h2>
+
+Write the pitch-rate dynamics as a model part plus the control effect:
+
+<Equation n="12.1" tex="\dot q = f(x) + g(x)\,\delta" />
+
+where <M t="f" /> collects everything the aircraft does by itself (damping, static stability, disturbances) and <M t="g" /> is the control effectiveness, <M t="M_\delta" /> in the linear case. If both were known exactly, choosing <M t="\delta = (\nu - f)/g" /> would make <M t="\dot q = \nu" />: the aircraft would behave like a pure integrator, and a simple outer law <M t="\nu = K_v(q_c - q)" /> would give a first-order response with time constant <M t="1/K_v" /> at every flight condition. The catch is that <M t="f" /> contains everything that is hard to model, including disturbances, and any error in it appears directly in the response.
+
+<h2 class="sec" id="s2"><span class="n">12.2</span>The incremental step</h2>
+
+INDI avoids modelling <M t="f" />. Over one short control step, the state hardly changes while the control surface can move quickly, so
+
+<Equation n="12.2" tex="\dot q \approx \dot q_0 + g\,(\delta - \delta_0)" />
+
+where <M t="\dot q_0" /> and <M t="\delta_0" /> are the current, measured pitch acceleration and surface position. Asking for <M t="\dot q = \nu" /> gives the INDI law:
+
+<Equation n="12.3" tex="\delta_c = \delta_0 + \hat g^{-1}\left(\nu - \dot q_0\right)" />
+
+Everything that <M t="f" /> contained is now inside the measurement <M t="\dot q_0" />. The controller needs a model only of the control effectiveness, written <M t="\hat g" />, plus good measurements of angular acceleration and of the actuator position.
+
+<div class="bench-wrap"><IndiLab client:load /></div>
+
+<h2 class="sec" id="s3"><span class="n">12.3</span>What the bench shows</h2>
+
+Both controllers are designed for the same nominal aircraft: the classical one is a PI on pitch-rate error, the INDI one uses (12.3) with <M t="K_v = 5" /> 1/s.
+
+- **Disturbances.** With the pitching-moment disturbance on, INDI's pitch rate barely dips, while the PI loses noticeably more before its integrator catches up. INDI sees the disturbance immediately in <M t="\dot q_0" /> and cancels it in the next increment.
+- **Wrong effectiveness, too high.** Set the true effectiveness above what the controllers assume. The PI's loop gain rises with it and its overshoot grows; INDI only takes larger increments than needed and still converges cleanly.
+- **Wrong effectiveness, too low, with a slow actuator.** Now lower the ratio and slow the actuator down. INDI's increments are too small and arrive late, and it starts to overshoot as well. INDI is not model-free: it depends on <M t="\hat g" /> and on actuator dynamics being fast compared with the response it is asked for.
+
+<QuickCheck client:idle id="qc-indi" question="Which model information does the INDI law (12.3) still need?" options={[
+  { text: 'The control effectiveness ĝ, plus measurements of angular acceleration and actuator position', correct: true, why: 'The aircraft’s own dynamics f(x) are replaced by the measured q̇₀; only the effect of the control surface must be modelled.' },
+  { text: 'All stability derivatives, as in classical design', why: 'That is what plain dynamic inversion needs. The incremental form replaces f(x) with a measurement.' },
+  { text: 'None: INDI is model-free', why: 'It needs ĝ, and the bench shows what happens when that estimate is off, especially with slow actuators.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">12.4</span>The practical price</h2>
+
+The measurement that makes INDI robust is also its main practical difficulty. Angular acceleration is rarely measured directly; it is usually obtained by differentiating filtered gyro signals, which adds delay. To keep the increment consistent, the actuator position is passed through the same filter, so that <M t="\dot q_0" /> and <M t="\delta_0" /> describe the same moment in time. Sensor noise, filter delay and actuator rate limits (lesson 9) set how high <M t="K_v" /> can go.
+
+<QuickCheck client:idle id="qc-sync" question="Why is the actuator position filtered with the same filter as the angular acceleration in practical INDI?" options={[
+  { text: 'So that the measured acceleration and the surface position used in the increment refer to the same instant', correct: true, why: 'If q̇₀ is delayed by filtering but δ₀ is not, the increment pairs an old effect with a new cause and the law loses its consistency.' },
+  { text: 'To remove noise from the actuator position sensor', why: 'That is a side effect. The main reason is time alignment with the filtered acceleration.' },
+  { text: 'Because the actuator position is not needed otherwise', why: 'It is central to (12.3): δ₀ is the base the increment is added to.' }
+]} />
+
+<h2 class="sec" id="s5"><span class="n">12.5</span>Where this leaves classical control</h2>
+
+INDI does not replace the ideas of this course; it relies on them. The outer law <M t="\nu = K_v(q_c - q)" /> is a classical controller on an integrator. Its gain is limited by the same phase-margin reasoning as in lesson 4, with actuator and filter lags in the loop. Handling qualities, autopilot structure and the time-scale separation of lesson 8 all still apply. What changes is how much of the aircraft has to be modelled, and how gracefully the loop copes when the model or the aircraft changes.
+
+<h2 class="sec" id="s6"><span class="n">12.6</span>In short</h2>
+
+- Dynamic inversion cancels the aircraft's dynamics, but needs an accurate model of them.
+- INDI replaces that model with measured acceleration: <M t="\delta_c = \delta_0 + \hat g^{-1}(\nu - \dot q_0)" />.
+- It rejects disturbances and unmodelled dynamics well, and tolerates an overestimated effectiveness gracefully.
+- It still depends on the effectiveness estimate, fast actuators, and well-synchronised acceleration and position measurements.

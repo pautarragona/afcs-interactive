@@ -31,7 +31,7 @@
         series={[{ x: Vs, y: aCurve, kind: 'ink' }, { x: Vs, y: dCurve, kind: 'spec' }]}
         hlines={[{ at: 0, kind: 'muted', dash: false }]}
         points={[{ x: V, y: cur.a, kind: 'grab', label: `α = ${cur.a.toFixed(1)}°`, r: 5 }, { x: V, y: cur.d, kind: 'grab', label: `δe = ${cur.d.toFixed(1)}°`, r: 5 }]} />
-      <figcaption><b>Fig. B.1</b> Trim curves. Black: angle of attack. Blue: elevator angle (positive trailing edge down). Orange: your airspeed.</figcaption>
+      <figcaption><b>Fig. B.1</b> Trim curves. <span class="c-ink"></span>: angle of attack. Blue: elevator angle (positive trailing edge down). Orange: your airspeed.</figcaption>
     </figure>
     <div class="side controls">
       <Slider bind:value={V} min={65} max={225} step={1} unit="m/s" digits={0}>Airspeed <i class="m">V</i></Slider>

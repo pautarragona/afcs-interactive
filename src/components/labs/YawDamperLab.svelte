@@ -41,7 +41,7 @@
     <figure class="grow">
       <Plot xRange={[0, T]} yRange={[-0.2, Math.max(...none.r) * 1.15]} xLabel="t [s]" yLabel="r [°/s]" unitX="s" ariaLabel="Yaw rate during a rudder-held turn"
         series={[{ x: none.t, y: none.r, kind: 'ghost' }, { x: cur.t, y: cur.r }]} hlines={[{ at: rss(0, false), kind: 'spec', label: 'turn rate the pilot asked for' }]} />
-      <figcaption><b>Fig. 6.3</b> Yaw rate with the rudder held. Grey: no damper. Black: with the damper.</figcaption>
+      <figcaption><b>Fig. 6.3</b> Yaw rate with the rudder held. Grey: no damper. <span class="c-ink"></span>: with the damper.</figcaption>
     </figure>
     <div class="side controls">
       <Slider bind:value={Kr} min={0} max={2} step={0.02} unit="s" digits={2}>Yaw damper gain <i class="m">K</i><sub>r</sub></Slider>
