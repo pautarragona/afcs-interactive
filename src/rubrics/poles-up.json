@@ -1,0 +1,41 @@
+{
+  "id": "poles-up",
+  "prompt": "Drag both poles straight up, away from the real axis. What happens to the overshoot, and why?",
+  "tryFirst": {
+    "direction": "up",
+    "nudge": "Try it first: drag a pole straight up in the s-plane and watch the step response while you do."
+  },
+  "points": [
+    {
+      "id": "overshoot-grows",
+      "match": [["overshoot", "peak", "overshoots", "goes above", "goes over"], ["more", "bigger", "larger", "increas", "higher", "grow", "rise", "up"]],
+      "found": "Yes: the overshoot grows.",
+      "hint": "Look at the highest point of the curve while you drag up. Does it climb or drop?"
+    },
+    {
+      "id": "faster-oscillation",
+      "match": [["oscillat", "wiggl", "frequen", "period", "ring", "bounc", "wav"], ["faster", "more", "quicker", "higher", "shorter", "increas"]],
+      "found": "And it oscillates faster: the imaginary part is the damped frequency.",
+      "hint": "Also watch the wiggles after the peak. Do they come closer together or further apart?"
+    },
+    {
+      "id": "damping-drops",
+      "match": [["damping", "zeta", "ζ", "damped", "angle"], ["less", "lower", "decreas", "drop", "smaller", "reduc", "down", "under", "wider", "bigger", "larger"]],
+      "found": "The reason: moving away from the real axis widens the angle θ, so the damping ratio ζ = cos θ drops, and lower ζ means more overshoot.",
+      "hint": "For the why, watch the damping ratio readout and the dashed line from the origin to the pole."
+    }
+  ],
+  "misconceptions": [
+    {
+      "match": [["settl"], ["longer", "slower", "increas", "shorter", "quicker", "decreas", "faster"]],
+      "reply": "Check the settling-time readout, though: it hardly moves. Going straight up keeps the real part fixed, and the real part sets how fast the response settles."
+    },
+    {
+      "match": [["damping", "zeta", "ζ"], ["more", "increas", "higher", "grows"]],
+      "reply": "Careful with ζ: watch its readout while you drag up. It goes down, not up."
+    }
+  ],
+  "allFound": "Right on all counts.",
+  "noneFound": "Not quite yet.",
+  "followUp": "Now try the other direction: move both poles straight left. What changes this time, and what stays the same?"
+}

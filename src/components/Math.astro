@@ -1,0 +1,17 @@
+---
+// Renders TeX to HTML at build time with KaTeX, so pages ship no maths JavaScript.
+import katex from 'katex';
+
+interface Props {
+  tex: string;
+  display?: boolean;
+}
+const { tex, display = false } = Astro.props;
+const html = katex.renderToString(tex, { displayMode: display, throwOnError: true, output: 'htmlAndMathml' });
+---
+
+{display ? <div class="math-display" set:html={html} /> : <span set:html={html} />}
+
+<style>
+  .math-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; font-size: 1.15em; }
+</style>

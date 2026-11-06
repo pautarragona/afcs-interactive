@@ -1,0 +1,150 @@
+/*
+ * Design tokens. Every component reads these variables, so a new direction is a change
+ * to this file (plus fonts in the layout), not to the components.
+ * Provisional: direction A, "Clear paper", until a direction is picked.
+ */
+
+:root {
+  --font-text: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-math: 'STIX Two Text', Georgia, serif;
+  --font-numbers: inherit;
+
+  --step-0: 18px;
+  --step-1: 26px;
+  --step-2: 28px;
+  --step-3: clamp(34px, 5vw, 48px);
+  --measure: 760px;
+  --page: 1120px;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f1f4fd;
+  --card: #ffffff;
+  --ink: #1d2433;
+  --muted: #586174;
+  --rule: #d9dfec;
+  --focus: #2d5bdb;
+  --link: #2d5bdb;
+  --ok: #1f7a55;
+  --ok-soft: rgba(31, 122, 85, 0.1);
+  --caution-ink: #b4501a;
+  --caution-soft: rgba(180, 80, 26, 0.1);
+  --btn-bg: #2d5bdb;
+  --btn-ink: #ffffff;
+  --field-bg: #ffffff;
+  --feedback-bg: #f1f4fd;
+  --challenge-border: #2d5bdb;
+
+  --lab-bg: #f1f4fd;
+  --lab-ink: #1d2433;
+  --lab-ink-strong: #1d2433;
+  --lab-rule: #c9d1e3;
+  --fig-bg: #ffffff;
+  --fig-border: 1px solid #d9dfec;
+  --readout-bg: #ffffff;
+  --readout-label: #586174;
+  --readout-value: #1d2433;
+
+  --plot-grid: #e3e8f2;
+  --plot-axis: #586174;
+  --plot-text: #586174;
+  --plot-text-strong: #1d2433;
+  --plot-response: #2d5bdb;
+  --plot-response-soft: rgba(45, 91, 219, 0.12);
+  --plot-target: #7a4fd0;
+  --plot-target-soft: rgba(122, 79, 208, 0.1);
+  --plot-caution: #b4501a;
+  --plot-caution-soft: rgba(180, 80, 26, 0.09);
+  --plot-ghost: #97a2ba;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #10151f;
+    --surface: #171f30;
+    --card: #1c2538;
+    --ink: #e6eaf2;
+    --muted: #a1aabc;
+    --rule: #2c3750;
+    --focus: #86a6ff;
+    --link: #86a6ff;
+    --ok: #6fd3a5;
+    --ok-soft: rgba(111, 211, 165, 0.12);
+    --caution-ink: #f0a066;
+    --caution-soft: rgba(240, 160, 102, 0.12);
+    --btn-bg: #86a6ff;
+    --btn-ink: #0f1730;
+    --field-bg: #1c2538;
+    --feedback-bg: #171f30;
+    --challenge-border: #86a6ff;
+    --lab-bg: #171f30;
+    --lab-ink: #e6eaf2;
+    --lab-ink-strong: #e6eaf2;
+    --lab-rule: #33405a;
+    --fig-bg: #1c2538;
+    --fig-border: 1px solid #2c3750;
+    --readout-bg: #1c2538;
+    --readout-label: #a1aabc;
+    --readout-value: #e6eaf2;
+    --plot-grid: #26314a;
+    --plot-axis: #a1aabc;
+    --plot-text: #a1aabc;
+    --plot-text-strong: #e6eaf2;
+    --plot-response: #86a6ff;
+    --plot-response-soft: rgba(134, 166, 255, 0.14);
+    --plot-target: #c6a2ff;
+    --plot-target-soft: rgba(198, 162, 255, 0.12);
+    --plot-caution: #f0a066;
+    --plot-caution-soft: rgba(240, 160, 102, 0.12);
+    --plot-ghost: #5d6880;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #10151f;
+  --surface: #171f30;
+  --card: #1c2538;
+  --ink: #e6eaf2;
+  --muted: #a1aabc;
+  --rule: #2c3750;
+  --focus: #86a6ff;
+  --link: #86a6ff;
+  --ok: #6fd3a5;
+  --ok-soft: rgba(111, 211, 165, 0.12);
+  --caution-ink: #f0a066;
+  --caution-soft: rgba(240, 160, 102, 0.12);
+  --btn-bg: #86a6ff;
+  --btn-ink: #0f1730;
+  --field-bg: #1c2538;
+  --feedback-bg: #171f30;
+  --challenge-border: #86a6ff;
+  --lab-bg: #171f30;
+  --lab-ink: #e6eaf2;
+  --lab-ink-strong: #e6eaf2;
+  --lab-rule: #33405a;
+  --fig-bg: #1c2538;
+  --fig-border: 1px solid #2c3750;
+  --readout-bg: #1c2538;
+  --readout-label: #a1aabc;
+  --readout-value: #e6eaf2;
+  --plot-grid: #26314a;
+  --plot-axis: #a1aabc;
+  --plot-text: #a1aabc;
+  --plot-text-strong: #e6eaf2;
+  --plot-response: #86a6ff;
+  --plot-response-soft: rgba(134, 166, 255, 0.14);
+  --plot-target: #c6a2ff;
+  --plot-target-soft: rgba(198, 162, 255, 0.12);
+  --plot-caution: #f0a066;
+  --plot-caution-soft: rgba(240, 160, 102, 0.12);
+  --plot-ghost: #5d6880;
+}

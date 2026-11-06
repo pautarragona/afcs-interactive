@@ -1,0 +1,101 @@
+---
+import 'katex/dist/katex.min.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  section?: 'start' | 'core' | 'deeper' | 'guide' | null;
+}
+const { title, description = 'An open, interactive companion to TU Delft AE4301 Automatic Flight Control System Design.', section = null } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const nav = [
+  { id: 'start', label: 'Start here', href: `${base}#start` },
+  { id: 'core', label: 'Exam core', href: `${base}#core` },
+  { id: 'deeper', label: 'Deeper', href: `${base}#deeper` },
+  { id: 'guide', label: 'Exam guide', href: `${base}#guide` },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital@0;1&display=swap" />
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to the lesson</a>
+    <header class="site-header">
+      <div class="inner">
+        <a class="wordmark" href={base}>
+          <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 20 C 6 20, 7 5, 12 5 S 17 14, 24 13" /></svg>
+          Interactive AFCS
+        </a>
+        <nav aria-label="Sections">
+          {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
+        </nav>
+        <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4" /><path d="M10 1.5v2.5M10 16v2.5M1.5 10h2.5M16 10h2.5M4 4l1.8 1.8M14.2 14.2 16 16M4 16l1.8-1.8M14.2 5.8 16 4" /></svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 12.5A6.5 6.5 0 0 1 7.5 4.5a6.5 6.5 0 1 0 8 8z" /></svg>
+        </button>
+      </div>
+    </header>
+    <main id="content" class="page">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="inner">
+        <p>Content CC BY 4.0, code MIT. A companion to TU Delft AE4301 Automatic Flight Control System Design, not a replacement for its lectures.</p>
+        <p><a href="https://github.com/pautarragona/afcs-interactive">Source and corrections on GitHub</a></p>
+      </div>
+    </footer>
+    <script>
+      const btn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+      const root = document.documentElement;
+      const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      btn?.addEventListener('click', () => {
+        const next = isDark() ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 16px; top: 16px; background: var(--card); padding: 8px 12px; border-radius: var(--radius-sm); z-index: 10; }
+  .site-header { border-bottom: 1px solid var(--rule); }
+  .inner { max-width: var(--page); margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  .wordmark { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 19px; }
+  .wordmark svg { fill: none; stroke: var(--plot-response); stroke-width: 2; }
+  nav { display: flex; flex-wrap: wrap; gap: 4px 20px; flex: 1 1 auto; font-size: 16px; }
+  nav a { color: var(--muted); text-decoration: none; padding: 10px 0; }
+  nav a:hover, nav a[aria-current='page'] { color: var(--ink); }
+  nav a[aria-current='page'] { font-weight: 700; }
+  .theme-toggle { width: 44px; height: 44px; border-radius: 22px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+  .theme-toggle svg { fill: none; stroke: currentColor; stroke-width: 1.6; grid-area: 1 / 1; }
+  .icon-moon { display: none; }
+  :global(:root[data-theme='dark']) .icon-sun { display: none; }
+  :global(:root[data-theme='dark']) .icon-moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .icon-sun { display: none; }
+    :global(:root:not([data-theme='light'])) .icon-moon { display: block; }
+  }
+  .page { max-width: var(--page); margin: 0 auto; padding: 40px 24px 96px; }
+  .site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 15px; }
+  .site-footer .inner { display: block; padding: 24px; }
+  .site-footer p { margin: 4px 0; }
+</style>
