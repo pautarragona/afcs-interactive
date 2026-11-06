@@ -1,6 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import { evaluate, type Rubric } from '../src/lib/rubric';
 import polesUp from '../src/rubrics/poles-up.json';
+import polesLeft from '../src/rubrics/poles-left.json';
+
+describe('poles-left rubric', () => {
+  const r = polesLeft as Rubric;
+  const movedLeft = { up: false, down: false, left: true, right: false };
+  it('recognises a complete answer', () => {
+    const f = evaluate(r, 'It settles faster and the overshoot is smaller, but the oscillation frequency stays the same.', movedLeft);
+    expect(f.verdict).toBe('complete');
+  });
+  it('does not flag "oscillations die out faster" as faster oscillation', () => {
+    const f = evaluate(r, 'The oscillations die out faster and the overshoot drops', movedLeft);
+    expect(f.lines.join(' ')).not.toContain('spacing stays the same when');
+  });
+  it('flags faster oscillation as a misconception', () => {
+    const f = evaluate(r, 'It oscillates faster and settles quicker', movedLeft);
+    expect(f.lines.join(' ')).toContain('spacing stays the same when');
+  });
+});
 
 const rubric = polesUp as Rubric;
 const movedUp = { up: true, down: false, left: false, right: false };

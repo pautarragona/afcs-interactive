@@ -1,0 +1,23 @@
+---
+// Display equation with a textbook-style number, rendered at build time with KaTeX.
+import katex from 'katex';
+
+interface Props {
+  tex: string;
+  n: string;
+}
+const { tex, n } = Astro.props;
+const html = katex.renderToString(tex, { displayMode: true, throwOnError: true, output: 'htmlAndMathml' });
+---
+
+<div class="eq" id={`eq-${n}`}>
+  <div class="body" set:html={html} />
+  <span class="n">({n})</span>
+</div>
+
+<style>
+  .eq { display: grid; grid-template-columns: minmax(0, 1fr) 56px; align-items: center; margin: 18px 0; max-width: var(--measure); }
+  .body { overflow-x: auto; overflow-y: hidden; }
+  .body :global(.katex-display) { margin: 0; }
+  .n { text-align: right; font-family: var(--font-ui); font-size: 14px; color: var(--ink); }
+</style>

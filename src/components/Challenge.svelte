@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { slide } from 'svelte/transition';
   import { metrics } from '../sim/secondOrder';
   import { lab, meetsSpec, spec } from './lab/state.svelte';
 
@@ -6,39 +7,38 @@
   const ok = $derived(meetsSpec());
   const done = $derived(ok.overshoot && ok.settling);
   let hint = $state(false);
-
-  const overshootText = $derived(m.overshootPct === null ? 'unstable' : `${m.overshootPct.toFixed(1)} %`);
-  const settlingText = $derived(m.settlingTime === null ? 'never settles' : `${m.settlingTime.toFixed(1)} s`);
 </script>
 
-<section class="challenge" class:done aria-labelledby="challenge-h">
-  <h2 id="challenge-h">Challenge: meet the spec</h2>
-  <p>Place the poles so the overshoot stays under {spec.maxOvershootPct} % and the response settles within {spec.maxSettlingTime} s. The target zone in the s-plane shows where both hold.</p>
-  <ul aria-live="polite">
-    <li class:met={ok.overshoot}><span>Overshoot under {spec.maxOvershootPct} %</span><strong>{overshootText}, {ok.overshoot ? 'met' : 'not yet'}</strong></li>
-    <li class:met={ok.settling}><span>Settling time under {spec.maxSettlingTime} s</span><strong>{settlingText}, {ok.settling ? 'met' : 'not yet'}</strong></li>
-  </ul>
+<div class="challenge">
+  <p class="lead">Move the poles until both requirements are met. The blue region in the s-plane is where that is possible.</p>
+  <table class="num">
+    <thead><tr><th scope="col">Requirement</th><th scope="col" class="r">Now</th><th scope="col">Status</th></tr></thead>
+    <tbody aria-live="polite">
+      <tr class:met={ok.overshoot}><td>Overshoot below {spec.maxOvershootPct} %</td><td class="r">{m.overshootPct === null ? 'unstable' : `${m.overshootPct.toFixed(1)} %`}</td><td class="s">{ok.overshoot ? 'Met' : 'Not met'}</td></tr>
+      <tr class:met={ok.settling}><td>Settling time below {spec.maxSettlingTime} s</td><td class="r">{m.settlingTime === null ? 'never' : `${m.settlingTime.toFixed(2)} s`}</td><td class="s">{ok.settling ? 'Met' : 'Not met'}</td></tr>
+    </tbody>
+  </table>
   {#if done}
-    <p class="win">Both met. Look at where your poles ended up: far enough left to settle fast, and close enough to the real axis to keep ζ above about 0.6.</p>
+    <p class="win" transition:slide={{ duration: 200 }}>Both met. Your poles sit far enough left to settle quickly and close enough to the real axis to keep ζ above about 0.6.</p>
   {/if}
-  <button type="button" class="btn-quiet" aria-expanded={hint} onclick={() => (hint = !hint)}>{hint ? 'Hide the hint' : 'Show a hint'}</button>
+  <button type="button" class="btn-line" aria-expanded={hint} onclick={() => (hint = !hint)}>{hint ? 'Hide the hint' : 'Show a hint'}</button>
   {#if hint}
-    <p class="hint">Move the poles left to settle faster, and towards the real axis to cut the overshoot. The zone's edge is jagged because the exact 2 % settling time jumps as the response enters the band at a different peak; 4 / (ζω<sub>n</sub>) is the smooth rule of thumb.</p>
+    <p class="hint" transition:slide={{ duration: 200 }}>Move left to settle faster and towards the real axis to cut overshoot. The region's edge is jagged because the exact 2 % settling time jumps whenever the response enters the band at a different peak; equation (1.6) is the smooth rule of thumb.</p>
   {/if}
-</section>
+</div>
 
 <style>
-  .challenge { max-width: var(--measure); border: 1.5px solid var(--challenge-border); border-radius: var(--radius-lg); padding: 24px 28px; }
-  .challenge.done { border-color: var(--ok); }
-  h2 { margin: 0; font-size: var(--step-1); line-height: 1.25; }
-  p { margin: 8px 0 0; }
-  ul { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; }
-  li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--caution-soft); }
-  li strong { color: var(--caution-ink); font-variant-numeric: tabular-nums; }
-  li.met { background: var(--ok-soft); }
-  li.met strong { color: var(--ok); }
-  .win { font-weight: 700; color: var(--ok); }
-  .btn-quiet { margin-top: 16px; font: inherit; font-size: 16px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-sm); border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; }
-  .btn-quiet:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .hint { color: var(--muted); }
+  .challenge { max-width: var(--measure); font-family: var(--font-ui); }
+  .lead, .win, .hint { font-family: var(--font-text); font-size: var(--text-size); }
+  .lead { margin: 14px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; border: 1.5px solid var(--frame); background: var(--paper); }
+  th { text-align: left; font-weight: 400; color: var(--muted); }
+  th, td { padding: 9px 12px; border: 1px solid var(--rule); transition: background-color 220ms var(--ease), color 220ms var(--ease); }
+  .r { text-align: right; }
+  .s { color: var(--bad); }
+  tr.met td { background: var(--good-soft); }
+  tr.met .s { color: var(--good); font-weight: 700; }
+  .win { color: var(--good); margin: 14px 0 0; }
+  .btn-line { margin-top: 14px; }
+  .hint { color: var(--muted); margin: 12px 0 0; }
 </style>

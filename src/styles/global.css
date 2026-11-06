@@ -4,21 +4,39 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page-bg);
   color: var(--ink);
-  font-family: var(--font-text);
-  font-size: var(--step-0);
-  line-height: 1.6;
+  font-family: var(--font-ui);
+  font-size: var(--ui-size);
+  line-height: 1.55;
+  transition: background-color 200ms var(--ease), color 200ms var(--ease);
 }
-a { color: var(--link); text-underline-offset: 3px; }
+a { color: var(--spec); text-underline-offset: 3px; }
 a:hover { color: var(--ink); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-h1, h2, h3 { text-wrap: balance; }
-p { text-wrap: pretty; }
-.sym { font-family: var(--font-math); font-style: italic; }
-.prose { max-width: var(--measure); }
-.prose h2 { font-size: var(--step-2); line-height: 1.25; margin: 56px 0 8px; }
-.prose p, .prose ul { margin: 12px 0 0; }
+h1, h2, h3 { text-wrap: balance; font-family: var(--font-ui); }
+.m { font-family: var(--font-text); font-style: italic; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Reading text */
+.prose { font-family: var(--font-text); font-size: var(--text-size); line-height: 1.62; max-width: var(--measure); }
+.prose p { margin: 14px 0 0; text-wrap: pretty; }
+.prose ul, .prose ol { margin: 14px 0 0; padding-left: 1.3em; }
 .prose li + li { margin-top: 6px; }
-.stack-lg > * + * { margin-top: 56px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+.prose strong { font-weight: 600; }
+.prose .katex { font-size: 1.05em; }
+
+/* Section headings with textbook numbers */
+.sec { margin: 64px 0 0; font-size: 21px; font-weight: 700; line-height: 1.3; display: flex; gap: 14px; align-items: baseline; scroll-margin-top: 24px; }
+.sec .n { color: var(--muted); font-weight: 400; font-size: 17px; min-width: 2.2em; }
+
+/* Buttons */
+.btn { font-family: var(--font-ui); font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 18px; border: 1px solid var(--btn); border-radius: var(--r-sm); background: var(--btn); color: var(--btn-ink); cursor: pointer; transition: transform 120ms var(--ease), box-shadow 120ms var(--ease); }
+.btn:hover { box-shadow: var(--lift-shadow); }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+.btn-line { font-family: var(--font-ui); font-size: 14px; min-height: 44px; padding: 0 16px; border: 1px solid var(--frame); border-radius: var(--r-sm); background: transparent; color: var(--ink); cursor: pointer; transition: background-color 120ms var(--ease); }
+.btn-line:hover { background: var(--paper-line); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

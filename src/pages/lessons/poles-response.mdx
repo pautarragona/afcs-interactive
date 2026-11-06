@@ -1,0 +1,141 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Poles decide how a system responds
+description: Lesson 1 of Interactive AFCS. Drag the poles of a second-order system and see how damping ratio, natural frequency, overshoot and settling time follow from where they sit.
+slug: poles-response
+kicker: Exam core, lesson 1 of 8
+minutes: 20
+---
+
+import PoleLab from '../../components/lab/PoleLab.svelte';
+import ObserveBox from '../../components/ObserveBox.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Challenge from '../../components/Challenge.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+import PoleGeometry from '../../components/figures/PoleGeometry.astro';
+import SpecRegions from '../../components/figures/SpecRegions.astro';
+import polesUp from '../../rubrics/poles-up.json';
+import polesLeft from '../../rubrics/poles-left.json';
+
+<p class="lede">Pull back on the stick of an aircraft and the nose pitches up, overshoots a little, and settles. Whether that feels crisp, sluggish or bouncy is decided almost entirely by two numbers: the positions of two poles in the s-plane. This lesson teaches you to read those two points like a pilot reads an instrument.</p>
+
+By the end you should be able to:
+
+- read the damping ratio, natural frequency, decay rate and damped frequency straight off a pole's position;
+- predict overshoot and settling time from the poles, and know when the textbook estimate is off;
+- turn an overshoot and a settling-time requirement into a region of the s-plane.
+
+<h2 class="sec" id="s1"><span class="n">1.1</span>A second-order system</h2>
+
+A large part of flight control is about systems that store energy in two places and trade it back and forth: a mass on a spring, a pendulum, or an aircraft's nose bobbing about its centre of gravity after an elevator input. That last motion, the short-period mode, is the one this course keeps returning to. To a good first approximation it behaves like the standard second-order system
+
+<Equation n="1.1" tex="G(s) = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}" />
+
+with natural frequency <M t="\omega_n" /> in rad/s and damping ratio <M t="\zeta" />, which has no unit. The numerator is chosen so that <M t="G(0) = 1" />: after a unit step input, the output eventually settles at exactly 1. That makes the shape of the response easy to compare, whatever the physical units. (The real short-period transfer function also has a zero; lesson 5 adds it back.)
+
+The poles are the roots of the denominator. For <M t="0 \le \zeta < 1" /> they form a complex-conjugate pair,
+
+<Equation n="1.2" tex="s_{1,2} = -\zeta\omega_n \pm j\,\omega_n\sqrt{1-\zeta^2} = -\sigma \pm j\,\omega_d" />
+
+where <M t="\sigma" /> is the decay rate and <M t="\omega_d" /> the damped frequency. Everything the response does, how fast it rises, how far it overshoots, how long it rings, follows from where this pair sits. Rather than take that on faith, try it.
+
+<h2 class="sec" id="s2"><span class="n">1.2</span>Move the poles</h2>
+
+The bench below starts with poles at <M t="-1.2 \pm j\,2.4" />. Drag one of the orange rings and its mirror image follows, because a real system's complex poles always come in conjugate pairs. Press **Play the response** to watch the step unfold in real time, with the aircraft on the right pitching to match.
+
+<div class="bench-wrap"><PoleLab client:load /></div>
+
+Spend a minute moving things around before reading on. Drag towards the right-hand, hatched half of the plane and see what happens to the response. Then use the dials: the damping dial swings the poles around a circle, and the frequency dial slides them along a straight line through the origin. You will meet both of those curves again in a moment.
+
+<h2 class="sec" id="s3"><span class="n">1.3</span>Reading a pole</h2>
+
+Each coordinate of a pole has a physical meaning, and Fig. 1.3 shows all of them at once. The height of the pole is the damped frequency <M t="\omega_d" />, the frequency at which the response actually oscillates. Its distance from the imaginary axis is the decay rate <M t="\sigma" />, which sets how quickly those oscillations die out. Its straight-line distance from the origin is the natural frequency <M t="\omega_n" />, and the angle <M t="\theta" /> it makes with the negative real axis fixes the damping ratio:
+
+<Equation n="1.3" tex="\sigma = \zeta\omega_n, \qquad \omega_d = \omega_n\sqrt{1-\zeta^2}, \qquad \zeta = \cos\theta" />
+
+<PoleGeometry n="1.3" />
+
+This explains the two dials. Turning the damping dial changes <M t="\theta" /> at fixed distance <M t="\omega_n" />, so the poles travel around a circle. Turning the frequency dial changes the distance at fixed angle, so they slide along a ray from the origin, and every point on that ray has the same damping ratio.
+
+<h2 class="sec" id="s4"><span class="n">1.4</span>What did you notice?</h2>
+
+<ObserveBox client:visible rubric={polesUp} />
+
+<h2 class="sec" id="s5"><span class="n">1.5</span>From poles to the response</h2>
+
+The step response of (1.1) can be written out exactly. For the underdamped case it is
+
+<Equation n="1.4" tex="y(t) = 1 - e^{-\sigma t}\left(\cos\omega_d t + \frac{\sigma}{\omega_d}\sin\omega_d t\right)" />
+
+Read it term by term. The bracket oscillates at <M t="\omega_d" />, the pole's height. The envelope <M t="e^{-\sigma t}" /> shrinks that oscillation at a rate set by <M t="\sigma" />, the pole's distance from the imaginary axis. Height means oscillation, distance from the axis means decay.
+
+Three numbers summarise the curve, and they are the ones the exam asks for. The first peak arrives at the peak time and overshoots the final value by
+
+<Equation n="1.5" tex="t_p = \frac{\pi}{\omega_d}, \qquad M_p = \exp\!\left(\frac{-\pi\zeta}{\sqrt{1-\zeta^2}}\right)" />
+
+Notice that the overshoot depends on <M t="\zeta" /> alone: poles anywhere on the same ray from the origin overshoot by the same amount. The settling time, the moment after which the response stays within ±2 % of its final value, is usually estimated with
+
+<Equation n="1.6" tex="t_s \approx \frac{4}{\sigma} = \frac{4}{\zeta\omega_n}" />
+
+which comes from asking when the envelope <M t="e^{-\sigma t}" /> has fallen to about 2 %. It is a rule of thumb, not an identity. For the starting poles it gives 3.33 s, while the exact value in the bench's table is 3.11 s: the response happens to enter the band just after a peak, before the envelope alone would allow. In an exam, use (1.6) unless you are asked for the exact value, and say that it is an estimate.
+
+<h2 class="sec" id="s6"><span class="n">1.6</span>The other direction</h2>
+
+<ObserveBox client:visible rubric={polesLeft} />
+
+<QuickCheck client:visible id="qc-overshoot" question="You want less overshoot, but the settling time must stay the same. Where do you move the poles?" options={[
+  { text: 'Straight left, away from the imaginary axis', why: 'Moving left does cut the overshoot, but it also increases σ and so shortens the settling time. The requirement was to keep it the same.' },
+  { text: 'Straight down, towards the real axis', correct: true, why: 'Keeping the real part fixed keeps σ, and so the settling time from (1.6), the same. Moving towards the real axis narrows θ, raising ζ and lowering the overshoot.' },
+  { text: 'Along a ray away from the origin', why: 'A ray from the origin keeps θ, and so ζ and the overshoot, constant. It only makes everything faster.' }
+]} />
+
+<h2 class="sec" id="s7"><span class="n">1.7</span>Stability is a side of the plane</h2>
+
+So far the poles have stayed in the left half of the plane, where <M t="\sigma > 0" /> and the envelope <M t="e^{-\sigma t}" /> shrinks. Drag them across the imaginary axis and <M t="\sigma" /> turns negative: the same envelope now grows, and the response spirals away instead of settling. Exactly on the imaginary axis, <M t="\sigma = 0" />, the oscillation neither grows nor decays. That is marginal stability, which no flight control system should rely on.
+
+<QuickCheck client:visible id="qc-stability" question="A pair of poles sits at 0.3 ± j2. What does the step response do?" options={[
+  { text: 'It oscillates with a slowly growing amplitude', correct: true, why: 'The real part is positive, so σ = −0.3 and the envelope e^(0.3t) grows. The height of 2 rad/s sets how fast it oscillates while doing so.' },
+  { text: 'It settles slowly, because 0.3 is small', why: 'Only poles with a negative real part settle. A small positive real part means the growth is slow, but it is still growth.' },
+  { text: 'It oscillates forever at constant amplitude', why: 'That happens only for poles exactly on the imaginary axis, with real part zero.' }
+]} />
+
+<h2 class="sec" id="s8"><span class="n">1.8</span>Requirements become regions</h2>
+
+Design rarely starts from poles. It starts from requirements: overshoot below some value, settled within some time. Equations (1.5) and (1.6) turn each requirement into a boundary in the s-plane. A maximum overshoot sets a minimum damping ratio, which by <M t="\zeta = \cos\theta" /> is a maximum angle: a wedge around the negative real axis. A maximum settling time sets a minimum decay rate: everything left of a vertical line. Fig. 1.4 shows the two together.
+
+<SpecRegions n="1.4" />
+
+This picture is the bridge to everything that follows. In lesson 3 the root locus shows where a controller can move the poles, and the design question becomes whether that path passes through the allowed region.
+
+<h2 class="sec" id="s9"><span class="n">1.9</span>Challenge: meet the spec</h2>
+
+<Challenge client:visible />
+
+<h2 class="sec" id="s10"><span class="n">1.10</span>Back to the aircraft</h2>
+
+For the short-period mode, these numbers have names pilots care about. A damping ratio that is too low makes the nose bob after every input, and precise tracking becomes tiring. One that is too high makes the aircraft feel sluggish, as if it were reluctant to respond. The military flying-qualities specification MIL-F-8785C puts the best rating, Level 1, for demanding manoeuvring tasks at a short-period damping ratio between 0.35 and 1.30. Frequency matters too: too low feels slow, too high feels twitchy. Lesson 7 turns this into the CAP and Gibson criteria used in the exercise.
+
+When the bare aircraft misses those limits, a stability augmentation system feeds back pitch rate to move the poles. That is lesson 6, and you already know what it has to achieve: move a pair of points into a region.
+
+<h2 class="sec" id="s11"><span class="n">1.11</span>A worked exam question</h2>
+
+<div class="box worked">
+<p class="tag">Question</p>
+<p>A system has poles at <M t="-2 \pm j\,3" />. Find <M t="\omega_n" />, <M t="\zeta" />, the overshoot, the peak time and an estimate of the 2 % settling time.</p>
+<p class="tag" style="margin-top: 14px">Solution</p>
+<p>Read off <M t="\sigma = 2" /> and <M t="\omega_d = 3" />. Then <M t="\omega_n = \sqrt{2^2 + 3^2} = \sqrt{13} \approx 3.61" /> rad/s and <M t="\zeta = \sigma/\omega_n = 2/3.61 \approx 0.555" />.</p>
+<p>From (1.5), <M t="M_p = \exp(-\pi \cdot 0.555 / \sqrt{1 - 0.555^2}) \approx 0.123" />, so about 12.3 % overshoot, at <M t="t_p = \pi / 3 \approx 1.05" /> s.</p>
+<p>From (1.6), <M t="t_s \approx 4/2 = 2.0" /> s. The exact value is 1.62 s; the estimate is conservative here.</p>
+</div>
+
+You can check every number by dragging the bench's poles to <M t="-2 \pm j\,3" />.
+
+<h2 class="sec" id="s12"><span class="n">1.12</span>In short</h2>
+
+- The height of a pole is the damped frequency: it sets how fast the response oscillates.
+- Its distance from the imaginary axis is the decay rate: it sets how fast the response settles.
+- Its angle from the negative real axis sets the damping ratio, <M t="\zeta = \cos\theta" />, and with it the overshoot.
+- Requirements on overshoot and settling time become a wedge and a vertical line in the s-plane, and a design must put its poles inside both.
+
+<p class="next">Next: lesson 2, steady-state error, is in preparation. <a href={import.meta.env.BASE_URL}>Back to the course overview</a></p>

@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import { course } from '../data/course';
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<Base title="Interactive AFCS">
+  <article class="home">
+    <p class="kicker">An open companion to TU Delft AE4301 Automatic Flight Control System Design</p>
+    <h1>Flight control you can move, break and explain</h1>
+    <p class="lede">Each lesson is built around a simulation you can drag, a question about what you saw, and the equations that explain it. It follows the AE4301 exam topics, starts from scratch for students without an aerospace background, and goes further where the course stops.</p>
+    <p class="cta"><a class="btn" href={`${base}lessons/poles-response/`}>Start with lesson 1: poles decide the response</a></p>
+
+    {course.map((track) => (
+      <section class="track">
+        <h2>{track.name}</h2>
+        <ol>
+          {track.lessons.map((l) => (
+            <li>
+              <span class="id">{l.id}</span>
+              {l.slug ? <a href={`${base}lessons/${l.slug}/`}>{l.title}</a> : <span class="soon">{l.title}</span>}
+              <span class="state">{l.slug ? 'available' : 'in preparation'}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </article>
+</Base>
+
+<style>
+  .kicker { margin: 0; font-size: 14px; color: var(--muted); }
+  h1 { margin: 8px 0 0; font-size: clamp(30px, 4.4vw, 44px); line-height: 1.12; max-width: 760px; }
+  .lede { font-family: var(--font-text); font-size: 21px; line-height: 1.55; max-width: var(--measure); margin: 16px 0 0; }
+  .cta { margin: 28px 0 0; }
+  .cta .btn { display: inline-flex; align-items: center; text-decoration: none; }
+  .track { margin-top: 48px; max-width: var(--measure); }
+  h2 { font-size: 18px; margin: 0 0 8px; }
+  ol { list-style: none; margin: 0; padding: 0; border: 1.5px solid var(--frame); border-radius: var(--r-md); background: var(--paper); }
+  li { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--rule); align-items: baseline; }
+  li:first-child { border-top: none; }
+  .id { color: var(--muted); }
+  .soon { color: var(--muted); }
+  .state { font-size: 13px; color: var(--muted); }
+  li a + .state { color: var(--good); }
+</style>

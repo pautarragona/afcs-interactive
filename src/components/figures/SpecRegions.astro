@@ -1,0 +1,41 @@
+---
+// Static figure: an overshoot limit and a settling-time limit become a region in the s-plane.
+interface Props { n: string }
+const { n } = Astro.props;
+---
+
+<figure class="fig">
+  <svg viewBox="0 0 440 290" role="img" aria-label="Allowed pole region: to the left of the vertical line sigma equals sigma min, and inside the wedge of constant damping ratio zeta min around the negative real axis.">
+    <polygon class="allowed" points="280,60 242.5,10 30,10 30,270 242.5,270 280,220" />
+    <line class="axis" x1="20" y1="140" x2="420" y2="140" />
+    <line class="axis" x1="340" y1="10" x2="340" y2="270" />
+    <line class="limit" x1="340" y1="140" x2="242.5" y2="10" />
+    <line class="limit" x1="340" y1="140" x2="242.5" y2="270" />
+    <line class="limit" x1="280" y1="10" x2="280" y2="270" />
+    <text class="t spec" x="356" y="40"><tspan class="m">ζ</tspan> = <tspan class="m">ζ</tspan><tspan class="m sub" dy="4">min</tspan></text>
+    <text class="t small" x="356" y="58" dy="0">overshoot limit, (1.5)</text>
+    <line class="leader" x1="352" y1="46" x2="300" y2="86" />
+    <text class="t spec" x="284" y="286"><tspan class="m">σ</tspan> = <tspan class="m">σ</tspan><tspan class="m sub" dy="4">min</tspan><tspan dy="-4"> = 4 / </tspan><tspan class="m">t</tspan><tspan class="m sub" dy="4">s,max</tspan></text>
+    <text class="t small" x="284" y="250" text-anchor="start" dx="6">settling limit, (1.6)</text>
+    <text class="t region" x="140" y="146" text-anchor="middle">allowed poles</text>
+    <text class="t small" x="404" y="132" text-anchor="end">Re(s)</text>
+  </svg>
+  <figcaption><b>Fig. {n}</b> Two specifications, two boundaries. The overshoot limit allows only poles inside a wedge around the negative real axis; the settling limit allows only poles to the left of a vertical line. A design must satisfy both.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 28px 0 0; max-width: 580px; }
+  svg { width: 100%; height: auto; display: block; font-family: var(--font-ui); overflow: visible; }
+  .allowed { fill: var(--spec-soft); }
+  .axis { stroke: var(--ink); stroke-width: 1; }
+  .limit { stroke: var(--spec); stroke-width: 1.4; }
+  .leader { stroke: var(--muted); stroke-width: 0.8; }
+  .t { font-size: 14px; fill: var(--ink); }
+  .t.spec { fill: var(--spec); }
+  .t.small { font-size: 12px; fill: var(--muted); }
+  .t.region { font-size: 15px; }
+  .m { font-family: var(--font-text); font-style: italic; font-size: 16px; }
+  .sub { font-size: 11px; }
+  figcaption { font-family: var(--font-text); font-size: 15px; color: var(--muted); margin-top: 6px; }
+  figcaption b { font-family: var(--font-ui); font-weight: 400; color: var(--ink); margin-right: 4px; }
+</style>

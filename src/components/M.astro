@@ -1,0 +1,8 @@
+---
+// Inline maths rendered at build time with KaTeX.
+import katex from 'katex';
+interface Props { t: string }
+const html = katex.renderToString(Astro.props.t, { displayMode: false, throwOnError: true, output: 'htmlAndMathml' });
+---
+
+<span set:html={html} />

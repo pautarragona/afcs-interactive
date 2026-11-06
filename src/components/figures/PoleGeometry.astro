@@ -1,0 +1,56 @@
+---
+// Static figure: how one pole's position encodes sigma, omega_d, omega_n and theta.
+interface Props { n: string }
+const { n } = Astro.props;
+---
+
+<figure class="fig">
+  <svg viewBox="0 0 420 270" role="img" aria-label="A pole at minus sigma plus j omega d. Its horizontal distance from the imaginary axis is sigma, its height is omega d, its distance from the origin is omega n, and the angle theta from the negative real axis satisfies cos theta equals zeta.">
+    <defs>
+      <marker id="g-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1.5 L10 5 L0 8.5 Z" class="ah" /></marker>
+    </defs>
+    <line class="axis" x1="20" y1="200" x2="400" y2="200" />
+    <line class="axis" x1="330" y1="230" x2="330" y2="16" />
+    <text class="t small" x="404" y="196" text-anchor="end">Re(s)</text>
+    <text class="t small" x="336" y="24">Im(s)</text>
+
+    <line class="radius" x1="330" y1="200" x2="170" y2="40" />
+    <path class="thin" d="M300 200 A30 30 0 0 1 308.8 178.8" />
+    <text class="t m" x="290" y="190">θ</text>
+
+    <line class="ext" x1="170" y1="40" x2="140" y2="40" />
+    <line class="dimline" x1="148" y1="42" x2="148" y2="198" marker-start="url(#g-arrow)" marker-end="url(#g-arrow)" />
+    <text class="t" x="140" y="124" text-anchor="end"><tspan class="m">ω</tspan><tspan class="m sub" dy="4">d</tspan><tspan dy="-4"> = </tspan><tspan class="m">ω</tspan><tspan class="m sub" dy="4">n</tspan><tspan dy="-4">√(1 − </tspan><tspan class="m">ζ</tspan><tspan>²)</tspan></text>
+
+    <line class="ext" x1="170" y1="44" x2="170" y2="236" />
+    <line class="ext" x1="330" y1="204" x2="330" y2="236" />
+    <line class="dimline" x1="172" y1="228" x2="328" y2="228" marker-start="url(#g-arrow)" marker-end="url(#g-arrow)" />
+    <text class="t" x="250" y="250" text-anchor="middle"><tspan class="m">σ</tspan><tspan> = </tspan><tspan class="m">ζω</tspan><tspan class="m sub" dy="4">n</tspan></text>
+
+    <text class="t" x="262" y="108" text-anchor="middle" transform="rotate(45 262 108)"><tspan class="m">ω</tspan><tspan class="m sub" dy="4">n</tspan></text>
+
+    <circle class="ring" cx="170" cy="40" r="12" />
+    <path class="cross" d="M165 35l10 10m0 -10l-10 10" />
+    <text class="t small" x="186" y="34">pole at −σ + j<tspan class="m">ω</tspan><tspan class="m sub" dy="3">d</tspan></text>
+  </svg>
+  <figcaption><b>Fig. {n}</b> One pole, read three ways: its height is the damped frequency, its distance from the imaginary axis is the decay rate, and its angle sets the damping ratio, with <i>ζ</i> = cos <i>θ</i>.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 28px 0 0; max-width: 560px; }
+  svg { width: 100%; height: auto; display: block; font-family: var(--font-ui); }
+  .axis { stroke: var(--ink); stroke-width: 1; }
+  .radius { stroke: var(--ink); stroke-width: 1.4; }
+  .thin { fill: none; stroke: var(--ink); stroke-width: 0.9; }
+  .ext { stroke: var(--muted); stroke-width: 0.8; stroke-dasharray: 3 3; }
+  .dimline { stroke: var(--ink); stroke-width: 1; }
+  .ah { fill: var(--ink); }
+  .ring { fill: var(--grab-soft); stroke: var(--grab); stroke-width: 1.6; }
+  .cross { stroke: var(--ink); stroke-width: 2.2; }
+  .t { font-size: 14px; fill: var(--ink); }
+  .t.small { font-size: 12px; fill: var(--muted); }
+  .m { font-family: var(--font-text); font-style: italic; font-size: 16px; }
+  .sub { font-size: 11px; }
+  figcaption { font-family: var(--font-text); font-size: 15px; color: var(--muted); margin-top: 6px; }
+  figcaption b { font-family: var(--font-ui); font-weight: 400; color: var(--ink); margin-right: 4px; }
+</style>

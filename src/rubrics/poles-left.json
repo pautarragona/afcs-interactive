@@ -1,0 +1,41 @@
+{
+  "id": "poles-left",
+  "prompt": "Now drag both poles straight left, keeping their height. What changes in the response, and what stays the same?",
+  "tryFirst": {
+    "direction": "left",
+    "nudge": "Try it first: drag a pole straight left in the s-plane, keeping its height, and watch both plots."
+  },
+  "points": [
+    {
+      "id": "settles-faster",
+      "match": [["settl", "dies", "decay", "damps out", "calms"], ["faster", "quicker", "sooner", "shorter", "less time", "earlier", "decreas"]],
+      "found": "Yes: it settles faster, because the real part σ sets how quickly the envelope e^(−σt) decays.",
+      "hint": "Watch the settling-time dimension line at the bottom of the plot while you drag left."
+    },
+    {
+      "id": "less-overshoot",
+      "match": [["overshoot", "peak"], ["less", "smaller", "lower", "decreas", "drop", "reduc", "down"]],
+      "found": "And the overshoot drops: moving left narrows the angle θ, so ζ = cos θ rises.",
+      "hint": "Also look at the height of the first peak. Does it grow or shrink?"
+    },
+    {
+      "id": "same-frequency",
+      "match": [["oscillat", "frequen", "period", "wiggl", "ω", "omega", "imaginary"], ["same", "unchanged", "constant", "stays", "does not change", "doesn't change", "doesnt change", "not change"]],
+      "found": "And the wiggles keep their spacing: the height of the pole is the damped frequency ω_d, and you did not change it.",
+      "hint": "What about the spacing between the wiggles? Compare it with the grey curve."
+    }
+  ],
+  "misconceptions": [
+    {
+      "match": [["oscillates faster", "oscillate faster", "oscillating faster", "faster oscillat", "frequency increas", "frequency goes up", "higher frequency", "wiggles faster"]],
+      "reply": "Look again at the wiggles: their spacing stays the same when you move straight left. Only moving up or down changes the damped frequency."
+    },
+    {
+      "match": [["settl"], ["slower", "longer", "increas", "more time"]],
+      "reply": "Check the settling time: moving left makes it shorter, not longer."
+    }
+  ],
+  "allFound": "Exactly.",
+  "noneFound": "Not quite yet.",
+  "followUp": "So the two coordinates do separate jobs: height sets the oscillation, distance from the imaginary axis sets the decay. Section 1.5 turns that into formulas."
+}

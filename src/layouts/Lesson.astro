@@ -1,0 +1,34 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  frontmatter: { title: string; description: string; slug: string; kicker: string; minutes: number };
+}
+const { frontmatter: fm } = Astro.props;
+---
+
+<Base title={`${fm.title} | Interactive AFCS`} description={fm.description} current={fm.slug}>
+  <article class="lesson">
+    <p class="kicker">{fm.kicker}, about {fm.minutes} minutes</p>
+    <h1>{fm.title}</h1>
+    <slot />
+  </article>
+</Base>
+
+<style>
+  .kicker { margin: 0; font-size: 14px; color: var(--muted); }
+  h1 { margin: 8px 0 0; font-size: clamp(30px, 4.2vw, 40px); line-height: 1.15; font-weight: 700; max-width: 780px; }
+  .lesson :global(> p), .lesson :global(> ul), .lesson :global(> ol) {
+    font-family: var(--font-text); font-size: var(--text-size); line-height: 1.62; max-width: var(--measure);
+  }
+  .lesson :global(> p) { margin: 14px 0 0; text-wrap: pretty; }
+  .lesson :global(> ul), .lesson :global(> ol) { margin: 14px 0 0; padding-left: 1.3em; }
+  .lesson :global(> ul li + li), .lesson :global(> ol li + li) { margin-top: 6px; }
+  .lesson :global(> p.lede) { font-size: 21px; margin-top: 14px; }
+  .lesson :global(> .bench-wrap) { margin-top: 20px; }
+  .lesson :global(.box) { margin: 28px 0 0; max-width: var(--measure); border-left: none; padding: 14px 18px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r-md); font-family: var(--font-text); font-size: 18px; }
+  .lesson :global(.box p) { margin: 6px 0 0; }
+  .lesson :global(.box .tag) { margin: 0; font-family: var(--font-ui); font-size: 13px; color: var(--muted); }
+  .lesson :global(.worked) { counter-reset: step; }
+  .lesson :global(.next) { margin-top: 56px; font-family: var(--font-ui); font-size: 15px; }
+</style>
