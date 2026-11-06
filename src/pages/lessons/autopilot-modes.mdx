@@ -1,0 +1,86 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Autopilot modes
+description: "Exam core, lesson 8. How autopilot modes are built as nested loops around a stability augmentation system: attitude hold, altitude hold, and the modes for approach and landing."
+slug: autopilot-modes
+---
+
+import AutopilotLab from '../../components/labs/AutopilotLab.svelte';
+import NestedLoops from '../../components/figures/NestedLoops.astro';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">An autopilot is not one controller but a stack of them. A fast inner loop makes the aircraft well behaved, a slower loop around it holds an attitude, and an even slower loop around that holds an altitude, a flight path or a heading. This lesson builds that stack for the longitudinal axis and shows the design rule that keeps it working.</p>
+
+By the end you should be able to:
+
+- draw the loop structure of attitude hold and altitude hold;
+- explain why inner loops must be several times faster than the loops around them;
+- describe the main longitudinal and lateral autopilot modes, including those for approach and landing.
+
+<h2 class="sec" id="s1"><span class="n">8.1</span>Nested loops</h2>
+
+Every mode is built around the stability augmentation of lesson 6. The pitch damper makes the short period well damped. Around it, an attitude controller compares the pitch attitude with a command and moves the elevator:
+
+<Equation n="8.1" tex="\delta_e = K_q\,q + K_\theta\,(\theta - \theta_c)" />
+
+Around that, an altitude controller turns an altitude error into an attitude command:
+
+<Equation n="8.2" tex="\theta_c = K_h\,(h_c - h)" />
+
+<NestedLoops n="8.1" />
+
+The structure works because of the time-scale separation of lesson 5. The altitude loop changes its command slowly enough that the attitude loop has already settled; the attitude loop in turn changes the elevator slowly compared with the pitch damper. Each loop can be tuned as if the loops inside it were perfect, with a crossover frequency a factor of three to five below the loop inside.
+
+<h2 class="sec" id="s2"><span class="n">8.2</span>Attitude hold</h2>
+
+Start the bench in attitude hold. The aircraft is the short-period model at constant speed (an autothrottle is assumed to hold the speed), and the command is a 5° step in pitch attitude.
+
+<div class="bench-wrap"><AutopilotLab client:load /></div>
+
+With the pitch damper off (<M t="K_q = 0" />), raising <M t="K_\theta" /> makes the attitude response oscillate badly: attitude feedback alone acts like a stiffer spring with no extra damping. Restore the damper and the same attitude gain gives a clean response. Notice also that the attitude settles exactly on the command without any integrator in the controller: the aircraft itself integrates, since <M t="\theta" /> is the integral of <M t="q" />, so the loop is type 1 (lesson 2).
+
+<QuickCheck client:idle id="qc-att" question="Why does the attitude hold oscillate much more with the pitch damper switched off?" options={[
+  { text: 'Attitude feedback adds stiffness but no damping; the rate feedback supplies the damping', correct: true, why: 'Kθ acts on θ, like a spring, raising the frequency; Kq acts on q, like a damper. Without Kq, more Kθ just means a faster, less damped oscillation.' },
+  { text: 'The elevator saturates', why: 'Saturation can happen, but the oscillation appears even when the elevator stays within limits. It is a damping problem.' },
+  { text: 'The attitude loop has a steady-state error', why: 'It has none: the aircraft integrates pitch rate into attitude, making the loop type 1.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">8.3</span>Altitude hold</h2>
+
+Switch to altitude hold and select +30 m. The outer loop commands an attitude proportional to the altitude error, limited to ±10°, and the attitude loop follows it. The altitude is the integral of the flight path, <M t="\dot h = V(\theta - \alpha)" />, so this loop is type 1 too and settles on the selected altitude.
+
+Now break the time-scale rule on purpose: lower the attitude gain until the middle loop becomes slow, and raise the altitude gain. The altitude starts to overshoot and oscillate, because the outer loop is now asking for changes faster than the attitude loop can deliver them.
+
+<QuickCheck client:idle id="qc-sep" question="An attitude loop has a crossover of 2 rad/s. Roughly where should the crossover of an altitude loop around it be?" options={[
+  { text: 'Around 0.4 to 0.7 rad/s', correct: true, why: 'A factor of three to five below the inner loop keeps the inner loop looking like a fast, settled system to the outer one.' },
+  { text: 'Around 2 rad/s, to make it as fast as possible', why: 'With no separation the loops interact and the outer loop loses phase margin from the inner loop’s dynamics.' },
+  { text: 'Around 10 rad/s', why: 'An outer loop faster than its inner loop cannot work: it would ask for attitude changes the attitude loop cannot follow.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">8.4</span>The mode catalogue</h2>
+
+Real autopilots offer a set of modes built from the same pieces:
+
+<table class="data">
+<thead><tr><th>Mode</th><th>Holds</th><th>Outer loop acts on</th></tr></thead>
+<tbody>
+<tr><td>Pitch attitude hold</td><td><M t="\theta" /></td><td>elevator, via the damper</td></tr>
+<tr><td>Altitude hold</td><td><M t="h" /></td><td>attitude command</td></tr>
+<tr><td>Vertical speed or flight path</td><td><M t="\dot h" /> or <M t="\gamma" /></td><td>attitude command</td></tr>
+<tr><td>Speed hold, autothrottle</td><td><M t="V" /></td><td>throttle (or attitude, in a climb)</td></tr>
+<tr><td>Glideslope tracking</td><td>deviation from the ILS beam</td><td>flight path command</td></tr>
+<tr><td>Flare</td><td>sink rate proportional to height</td><td>flight path command, close to the ground</td></tr>
+<tr><td>Roll attitude and heading hold</td><td><M t="\phi" />, then <M t="\psi" /></td><td>ailerons, via roll damper; heading commands bank</td></tr>
+</tbody>
+</table>
+
+Approach and landing modes are the demanding ones. Glideslope tracking holds the aircraft on a radio beam whose angular error grows more sensitive as the runway gets closer, so the effective gain rises during the approach. The flare then switches to a law that reduces the sink rate in proportion to height, an exponential path towards touchdown. The AE4301 exercise designs one of these outer modes on top of the inner loop you shaped for handling qualities in lesson 7.
+
+<h2 class="sec" id="s5"><span class="n">8.5</span>In short</h2>
+
+- Autopilot modes are nested loops: damper inside, attitude around it, path or altitude outside.
+- Each loop should cross over three to five times slower than the loop inside it.
+- Attitude and altitude loops are type 1 through the aircraft's own integrations; rate feedback supplies the damping that attitude feedback lacks.
+- Approach modes (glideslope, flare) are outer loops with demanding, time-varying requirements.

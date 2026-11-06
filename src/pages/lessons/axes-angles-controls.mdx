@@ -1,0 +1,90 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Axes, angles and controls
+description: "Start here, lesson A. The body axes, the angles that describe an aircraft's attitude and flight path, and what the stick and pedals do."
+slug: axes-angles-controls
+---
+
+import AnglesLab from '../../components/labs/AnglesLab.svelte';
+import ControlsLab from '../../components/labs/ControlsLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Control engineers coming from electrical or mechanical backgrounds know feedback well, but an aircraft brings its own vocabulary: three axes, a handful of angles that are easy to confuse, and controls that rarely do only one thing. This lesson gives you just enough of that vocabulary to follow the rest of the course.</p>
+
+By the end you should be able to:
+
+- name the body axes and the rotation rates about them;
+- tell pitch attitude, flight path angle and angle of attack apart, and relate them;
+- say what each control produces first, and what it produces as a side effect.
+
+<h2 class="sec" id="s1"><span class="n">A.1</span>Body axes</h2>
+
+Flight dynamics describes the aircraft in a frame fixed to it, the body axes, with the origin at the centre of gravity:
+
+- **x** points forward along the fuselage;
+- **y** points out along the right wing;
+- **z** points down, completing a right-handed set.
+
+Rotations about these axes are roll about x, pitch about y and yaw about z, with rates <M t="p" />, <M t="q" /> and <M t="r" />. With z pointing down, the positive directions come out the way a pilot would expect: positive <M t="p" /> drops the right wing, positive <M t="q" /> raises the nose, positive <M t="r" /> swings the nose to the right.
+
+<h2 class="sec" id="s2"><span class="n">A.2</span>Three angles that are easy to mix up</h2>
+
+In the longitudinal plane, with wings level and no wind, three angles describe where the aircraft points and where it goes:
+
+- the **pitch attitude** <M t="\theta" />: the angle between the body x-axis and the horizon;
+- the **flight path angle** <M t="\gamma" />: the angle between the velocity and the horizon;
+- the **angle of attack** <M t="\alpha" />: the angle between the body x-axis and the velocity.
+
+They are tied together by
+
+<Equation n="A.1" tex="\theta = \gamma + \alpha" />
+
+The angle of attack is what the wing feels, and it sets the lift. The flight path angle is what air traffic control cares about. The pitch attitude is what the pilot sees out of the window and on the attitude indicator. They are different things, and the bench lets you separate them.
+
+<div class="bench-wrap"><AnglesLab client:load /></div>
+
+Try holding the attitude fixed and lowering the flight path. The angle of attack grows: an aircraft that is losing height at constant attitude is flying at a higher angle of attack, closer to the stall. This is why a nose-high attitude on approach does not mean the aircraft is climbing.
+
+<QuickCheck client:idle id="qc-angles" question="An aircraft holds a pitch attitude of 5° while descending on a 3° glide path. What is its angle of attack?" options={[
+  { text: '8°', correct: true, why: 'With θ = γ + α and a descent meaning γ = −3°, α = θ − γ = 5 − (−3) = 8°.' },
+  { text: '2°', why: 'That would be the case if the aircraft were climbing at 3°. In a descent γ is negative, so it adds to the attitude.' },
+  { text: '5°', why: 'That is the attitude. The angle of attack is measured from the velocity, which points 3° below the horizon.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">A.3</span>The controls</h2>
+
+A conventional aircraft has three primary control surfaces, each mainly producing a moment about one axis:
+
+- the **elevator** on the tailplane, moved by pulling or pushing the stick, gives a pitching moment;
+- the **ailerons** on the outer wings, moved differentially by moving the stick sideways, give a rolling moment;
+- the **rudder** on the fin, moved by the pedals, gives a yawing moment.
+
+The fourth control, the throttle, changes thrust and with it the energy of the aircraft. Lesson 10 shows why that matters more than it seems.
+
+<div class="bench-wrap"><ControlsLab client:load /></div>
+
+Sign conventions for the surface deflections themselves differ between textbooks, so this lesson describes them by what the pilot does. Check the convention your course notes use before writing an equation with <M t="\delta_e" />, <M t="\delta_a" /> or <M t="\delta_r" /> in it. The rotations and rates are not ambiguous: the bench's three views show positive <M t="q" />, <M t="p" /> and <M t="r" /> for stick back, stick right and right pedal.
+
+<h2 class="sec" id="s4"><span class="n">A.4</span>Controls are coupled</h2>
+
+The tidy picture of one control per axis only holds at first. Roll and yaw in particular are coupled:
+
+- deflecting the ailerons to roll right raises the lift on the left wing, which also raises its drag and pulls the nose to the left, against the turn. This is **adverse yaw**, and it is why pilots coordinate aileron with rudder;
+- deflecting the rudder yaws the nose, the wings then meet the air at different speeds and the aircraft starts to roll as well.
+
+Pitch is coupled to speed and height in the same way, through energy. These couplings are exactly what the lateral and longitudinal modes of lessons 5 and 6 describe, and what stability augmentation in lesson 6 is built to tame.
+
+<QuickCheck client:idle id="qc-adverse" question="A pilot rolls right with ailerons alone, no rudder. What does the nose do at first?" options={[
+  { text: 'Swings left, against the turn', correct: true, why: 'The down-going aileron on the left wing raises its lift and drag, pulling the nose left. That is adverse yaw.' },
+  { text: 'Swings right, into the turn', why: 'That happens later, once the bank angle tilts the lift and the aircraft starts to turn. The first reaction to aileron alone is adverse yaw.' },
+  { text: 'Stays exactly on heading', why: 'Only with a coordinated rudder input. Aileron alone changes the drag of the two wings unequally.' }
+]} />
+
+<h2 class="sec" id="s5"><span class="n">A.5</span>In short</h2>
+
+- Body axes: x forward, y right wing, z down; rates <M t="p" />, <M t="q" />, <M t="r" /> about them.
+- <M t="\theta = \gamma + \alpha" />: attitude is flight path plus angle of attack (wings level, still air).
+- The angle of attack sets the lift; the flight path sets where the aircraft goes.
+- Elevator, ailerons and rudder each give mainly one moment, but roll and yaw are coupled, and so are pitch, speed and height.

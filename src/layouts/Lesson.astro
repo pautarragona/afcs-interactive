@@ -1,17 +1,27 @@
 ---
 import Base from './Base.astro';
+import { allLessons, neighbours } from '../data/course';
 
 interface Props {
-  frontmatter: { title: string; description: string; slug: string; kicker: string; minutes: number };
+  frontmatter: { title: string; description: string; slug: string };
 }
 const { frontmatter: fm } = Astro.props;
+const me = allLessons.find((l) => l.slug === fm.slug)!;
+const { prev, next } = neighbours(fm.slug);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const trackCount = allLessons.filter((l) => l.track === me.track).length;
+const trackIndex = allLessons.filter((l) => l.track === me.track).findIndex((l) => l.slug === me.slug) + 1;
 ---
 
 <Base title={`${fm.title} | Interactive AFCS`} description={fm.description} current={fm.slug}>
   <article class="lesson">
-    <p class="kicker">{fm.kicker}, about {fm.minutes} minutes</p>
+    <p class="kicker">{me.track}, lesson {me.id} ({trackIndex} of {trackCount}), about {me.minutes} minutes</p>
     <h1>{fm.title}</h1>
     <slot />
+    <nav class="pager" aria-label="Previous and next lesson">
+      {prev ? <a class="prev" href={`${base}lessons/${prev.slug}/`}><span>Previous, lesson {prev.id}</span>{prev.title}</a> : <span />}
+      {next ? <a class="next" href={`${base}lessons/${next.slug}/`}><span>Next, lesson {next.id}</span>{next.title}</a> : <span />}
+    </nav>
   </article>
 </Base>
 
@@ -26,9 +36,15 @@ const { frontmatter: fm } = Astro.props;
   .lesson :global(> ul li + li), .lesson :global(> ol li + li) { margin-top: 6px; }
   .lesson :global(> p.lede) { font-size: 21px; margin-top: 14px; }
   .lesson :global(> .bench-wrap) { margin-top: 20px; }
-  .lesson :global(.box) { margin: 28px 0 0; max-width: var(--measure); border-left: none; padding: 14px 18px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r-md); font-family: var(--font-text); font-size: 18px; }
+  .lesson :global(.box) { margin: 28px 0 0; max-width: var(--measure); padding: 14px 18px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r-md); font-family: var(--font-text); font-size: 18px; }
   .lesson :global(.box p) { margin: 6px 0 0; }
   .lesson :global(.box .tag) { margin: 0; font-family: var(--font-ui); font-size: 13px; color: var(--muted); }
-  .lesson :global(.worked) { counter-reset: step; }
-  .lesson :global(.next) { margin-top: 56px; font-family: var(--font-ui); font-size: 15px; }
+  .lesson :global(table.data) { margin: 18px 0 0; border-collapse: collapse; font-family: var(--font-ui); font-size: 14px; border: 1.5px solid var(--frame); background: var(--paper); max-width: var(--measure); width: 100%; }
+  .lesson :global(table.data th), .lesson :global(table.data td) { border: 1px solid var(--rule); padding: 8px 12px; text-align: left; }
+  .lesson :global(table.data th) { font-weight: 400; color: var(--muted); }
+  .pager { margin-top: 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: var(--measure); }
+  .pager a { display: block; padding: 14px 16px; border: 1.5px solid var(--frame); border-radius: var(--r-md); text-decoration: none; color: var(--ink); background: var(--paper); font-weight: 700; transition: box-shadow 140ms var(--ease), transform 140ms var(--ease); }
+  .pager a:hover { box-shadow: var(--lift-shadow); transform: translateY(-1px); }
+  .pager a span { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+  .pager .next { text-align: right; grid-column: 2; }
 </style>

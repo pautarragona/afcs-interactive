@@ -1,0 +1,77 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Stability augmentation
+description: "Exam core, lesson 6. How a pitch damper and a yaw damper move the poles of the bare aircraft, why feedback can fight the pilot, and what a washout filter is for."
+slug: stability-augmentation
+---
+
+import PitchDamperLab from '../../components/labs/PitchDamperLab.svelte';
+import YawDamperLab from '../../components/labs/YawDamperLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Many aircraft have modes that are too lightly damped for comfortable flying, especially at high altitude or high speed. A stability augmentation system, or SAS, fixes that with simple feedback: measure a rotation rate, move a control surface against it. This lesson designs the two classic dampers with the tools from lessons 3 and 5.</p>
+
+By the end you should be able to:
+
+- explain how pitch-rate feedback adds to the aircraft's own pitch damping;
+- choose a damper gain from a root locus;
+- explain why a damper reduces the steady response to the pilot's commands, and how a washout filter avoids it in yaw.
+
+<h2 class="sec" id="s1"><span class="n">6.1</span>Feedback as artificial damping</h2>
+
+The short-period model of lessons B and 5, with elevator <M t="\delta" />, is
+
+<Equation n="6.1" tex="\dot\alpha = Z_\alpha\alpha + q, \qquad \dot q = M_\alpha\alpha + M_q q + M_\delta\,\delta" />
+
+A pitch damper measures pitch rate with a gyro and adds it to the pilot's command, <M t="\delta = \delta_p + K_q q" />. Substituting gives
+
+<Equation n="6.2" tex="\dot q = M_\alpha\alpha + \left(M_q + M_\delta K_q\right) q + M_\delta\,\delta_p" />
+
+The feedback appears as a change of the pitch damping derivative itself: the aircraft behaves as if its tailplane damped rotation more strongly. With the elevator convention used here <M t="M_\delta" /> is negative, so a positive gain makes <M t="M_q + M_\delta K_q" /> more negative and, from (5.1), raises the damping ratio. Static stability <M t="M_\alpha" /> is untouched, so the frequency changes only through the product <M t="Z_\alpha M_q" />.
+
+<h2 class="sec" id="s2"><span class="n">6.2</span>Choosing the gain</h2>
+
+The closed-loop poles as a function of <M t="K_q" /> form a root locus, exactly as in lesson 3, with the gyro gain as the varying parameter. The bench starts from an illustrative bare aircraft with a short-period damping ratio of 0.22, well below the 0.35 that lesson 7 will ask for.
+
+<div class="bench-wrap"><PitchDamperLab client:load /></div>
+
+Raise the gain until the poles cross the dashed <M t="\zeta = 0.5" /> line. The overshoot in the pitch rate response disappears, but look at the blue steady-state line: it has dropped. The damper opposes every pitch rate, including the ones the pilot asks for, so the same stick input now produces a smaller steady pitch rate. Too much gain and the aircraft feels heavy and sluggish.
+
+<QuickCheck client:idle id="qc-pd" question="A pitch damper gain is doubled. What happens to the short period, according to (6.2) and (5.1)?" options={[
+  { text: 'Damping rises; the steady pitch rate per unit stick falls', correct: true, why: 'Doubling Kq doubles the added term MδKq in the effective Mq, so −(Zα + Mq,eff) grows and so does ζ. The same term reduces the steady response to the pilot.' },
+  { text: 'Static stability Mα increases', why: 'Pitch-rate feedback only changes the q term. Angle-of-attack feedback would change Mα.' },
+  { text: 'Nothing changes once the damper is engaged', why: 'Every change of gain moves the poles along the locus in Fig. 6.1.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">6.3</span>The yaw damper and the washout</h2>
+
+Laterally, most aircraft have a lightly damped oscillation of yaw and sideslip, often coupled with roll: the **Dutch roll**. The cure is the same idea, yaw-rate feedback to the rudder, <M t="\delta_r = \delta_{r,p} - K_r r" />, which adds <M t="-N_\delta K_r" /> to the yaw damping <M t="N_r" />.
+
+But in yaw the conflict with the pilot is worse. In a steady turn the aircraft yaws continuously, so a plain yaw damper sees a constant <M t="r" /> and applies a constant rudder against the turn. The fix is to feed back yaw rate through a **washout filter**, a high-pass filter
+
+<Equation n="6.3" tex="W(s) = \frac{\tau_w s}{\tau_w s + 1}" />
+
+which passes oscillations faster than about <M t="1/\tau_w" /> and blocks steady values. The damper then sees the Dutch roll wobble but not the steady turn.
+
+<div class="bench-wrap"><YawDamperLab client:load /></div>
+
+With the filter set to direct, raise the gain: the wobble disappears, and so does most of the turn the pilot asked for. Switch to washout and the turn rate settles back to the requested value while the Dutch roll stays damped. Lengthen the washout time constant and the damper fights the start of the turn for longer; shorten it too much and it starts to let the Dutch roll through as well.
+
+<QuickCheck client:idle id="qc-wo" question="Why does a pitch damper usually not need a washout, while a yaw damper does?" options={[
+  { text: 'Steady turns need a constant yaw rate, while sustained pitch rate is rare and brief', correct: true, why: 'A coordinated turn holds r constant for as long as it lasts, so a plain yaw damper would oppose it throughout. Pitch rate is normally only held for short manoeuvres.' },
+  { text: 'The elevator is more powerful than the rudder', why: 'Control power is not the issue; the issue is whether the motion being fed back has a legitimate steady value.' },
+  { text: 'Pitch-rate gyros do not drift', why: 'Sensor drift is a separate concern. The washout exists so that steady, intended yaw rates pass unopposed.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">6.4</span>Limited authority</h2>
+
+Classical stability augmentation systems are given limited authority: the actuator can only move the surface a few degrees around the pilot's command. A failed damper then produces at most a small, recoverable upset. Full-authority fly-by-wire systems remove that limit, and with it they must meet much stricter reliability requirements, usually with redundant sensors, computers and actuators. Lesson 9 shows what happens when a loop hits its actuator limits.
+
+<h2 class="sec" id="s5"><span class="n">6.5</span>In short</h2>
+
+- Rate feedback adds directly to the aircraft's damping derivative: <M t="M_q \to M_q + M_\delta K_q" />, <M t="N_r \to N_r - N_\delta K_r" />.
+- The gain is chosen on a root locus of the damper gain; frequency hardly changes, damping does.
+- Dampers also reduce the steady response to the pilot's commands.
+- A washout filter lets steady yaw rates through, so the yaw damper does not fight coordinated turns.

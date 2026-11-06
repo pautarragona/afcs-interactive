@@ -1,0 +1,53 @@
+---
+// Static figure: altitude loop around attitude loop around pitch damper.
+interface Props { n: string }
+const { n } = Astro.props;
+---
+
+<figure class="fig">
+  <svg viewBox="0 0 640 230" role="img" aria-label="Nested loops: altitude controller commands attitude, attitude controller commands elevator, pitch damper feeds back pitch rate, aircraft outputs pitch rate, attitude and altitude.">
+    <defs><marker id="nl-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1.5 L10 5 L0 8.5 Z" class="ah" /></marker></defs>
+    <g class="sig">
+      <line x1="10" y1="60" x2="58" y2="60" marker-end="url(#nl-arrow)" />
+      <line x1="170" y1="60" x2="208" y2="60" marker-end="url(#nl-arrow)" />
+      <line x1="320" y1="60" x2="378" y2="60" marker-end="url(#nl-arrow)" />
+      <line x1="510" y1="60" x2="630" y2="60" marker-end="url(#nl-arrow)" />
+      <path d="M560 60 V100 H264 V82" marker-end="url(#nl-arrow)" />
+      <path d="M590 60 V140 H114 V82" marker-end="url(#nl-arrow)" />
+      <path d="M535 60 V190 H344 V82" marker-end="url(#nl-arrow)" class="inner" />
+    </g>
+    <g class="box"><rect x="58" y="38" width="112" height="44" rx="3" /><text x="114" y="58" text-anchor="middle">Altitude</text><text x="114" y="74" text-anchor="middle" class="s">controller</text></g>
+    <g class="box"><rect x="208" y="38" width="112" height="44" rx="3" /><text x="264" y="58" text-anchor="middle">Attitude</text><text x="264" y="74" text-anchor="middle" class="s">controller</text></g>
+    <g class="box sum"><circle cx="350" cy="60" r="0" /></g>
+    <g class="box ac"><rect x="378" y="38" width="132" height="44" rx="3" /><text x="444" y="58" text-anchor="middle">Aircraft</text><text x="444" y="74" text-anchor="middle" class="s">with pitch damper</text></g>
+    <text class="lbl" x="14" y="52">h<tspan class="sub" dy="3">c</tspan></text>
+    <text class="lbl" x="178" y="52">θ<tspan class="sub" dy="3">c</tspan></text>
+    <text class="lbl" x="334" y="52">δ<tspan class="sub" dy="3">e</tspan></text>
+    <text class="lbl" x="600" y="52">h</text>
+    <text class="lbl" x="566" y="94">θ</text>
+    <text class="lbl" x="596" y="134">h</text>
+    <text class="lbl inner-t" x="541" y="184">q</text>
+    <text class="note" x="266" y="118">middle loop: seconds</text>
+    <text class="note" x="118" y="158">outer loop: tens of seconds</text>
+    <text class="note inner-t" x="348" y="208">inner loop: fractions of a second</text>
+  </svg>
+  <figcaption><b>Fig. {n}</b> Nested loops. Each loop sees the one inside it as a fast, already-settled system.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 28px 0 0; max-width: 700px; }
+  svg { width: 100%; height: auto; display: block; font-family: var(--font-ui); }
+  .sig line, .sig path { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+  .sig .inner { stroke: var(--muted); stroke-dasharray: 4 3; }
+  .ah { fill: var(--ink); }
+  .box rect { fill: var(--paper); stroke: var(--frame); stroke-width: 1.5; }
+  .box.ac rect { stroke-width: 2; }
+  .box text { font-size: 13px; fill: var(--ink); }
+  .box .s { font-size: 11px; fill: var(--muted); }
+  .lbl { font-family: var(--font-text); font-style: italic; font-size: 15px; fill: var(--ink); }
+  .sub { font-size: 10px; }
+  .note { font-size: 11px; fill: var(--muted); }
+  .inner-t { fill: var(--muted); }
+  figcaption { font-family: var(--font-text); font-size: 15px; color: var(--muted); margin-top: 6px; }
+  figcaption b { font-family: var(--font-ui); font-weight: 400; color: var(--ink); margin-right: 4px; }
+</style>

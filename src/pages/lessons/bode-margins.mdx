@@ -1,0 +1,80 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Bode plots and stability margins
+description: "Exam core, lesson 4. Reading a loop in the frequency domain, gain and phase margins, what a time delay costs, and how a lead compensator buys phase back."
+slug: bode-margins
+---
+
+import BodeLab from '../../components/labs/BodeLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">The root locus tells you where the closed-loop poles go. The Bode plot answers a different, very practical question: how close is this loop to going unstable, and how much uncertainty in gain or delay can it take? Flight control requirements are written in exactly those terms, as gain and phase margins.</p>
+
+By the end you should be able to:
+
+- read gain and phase margins off a Bode plot of the open loop;
+- explain why a time delay erodes phase margin without changing the magnitude plot;
+- relate phase margin to closed-loop damping, and use a lead compensator to buy margin back.
+
+<h2 class="sec" id="s1"><span class="n">4.1</span>Frequency response</h2>
+
+Feed a stable linear system a sine wave at frequency <M t="\omega" /> and, after the transient dies away, a sine comes out at the same frequency, scaled by <M t="|G(j\omega)|" /> and shifted by <M t="\angle G(j\omega)" />. A Bode plot draws those two quantities against frequency on logarithmic axes: magnitude in decibels, <M t="20\log_{10}|G|" />, and phase in degrees.
+
+Logarithms make the plots additive: multiplying transfer functions adds their Bode plots. A pole at <M t="-a" /> contributes a magnitude that falls at 20 dB per decade above <M t="\omega = a" /> and a phase that drops by 90°; an integrator contributes −20 dB per decade and −90° at every frequency. That is why Bode plots can be sketched by hand from straight-line asymptotes.
+
+<h2 class="sec" id="s2"><span class="n">4.2</span>Why the open loop tells you about the closed loop</h2>
+
+The closed loop goes unstable when <M t="1 + L(s) = 0" /> has a root on the imaginary axis, that is, when <M t="L(j\omega) = -1" /> for some frequency: gain exactly 1 and phase exactly −180°. A loop that is stable but close to that point is fragile. The two margins measure how close:
+
+<Equation n="4.1" tex="\text{PM} = 180^\circ + \angle L(j\omega_c), \qquad \text{GM} = -20\log_{10}\left|L(j\omega_{180})\right|" />
+
+The **phase margin** is measured at the gain crossover <M t="\omega_c" />, where <M t="|L| = 1" /> (0 dB): how much extra phase lag the loop can take before it oscillates. The **gain margin** is measured at the phase crossover <M t="\omega_{180}" />, where the phase is −180°: by how much the gain can grow before instability. Typical requirements are a phase margin of at least 45° and a gain margin of at least 6 dB. (Strictly this reasoning needs the open loop itself to be stable, as it is here; the general case is the Nyquist criterion.)
+
+<div class="bench-wrap"><BodeLab client:load /></div>
+
+Raise the gain: the magnitude curve shifts up, crossover moves to higher frequency where the phase is lower, and the phase margin shrinks. Watch the step response get faster and more oscillatory, and go unstable as both margins pass through zero.
+
+<h2 class="sec" id="s3"><span class="n">4.3</span>Phase margin and damping</h2>
+
+For loops dominated by one pair of closed-loop poles there is a useful rule of thumb linking the frequency domain to lesson 1:
+
+<Equation n="4.2" tex="\zeta \approx \frac{\text{PM}}{100^\circ} \qquad (\text{PM} \lesssim 65^\circ)" />
+
+A 45° margin means a damping ratio of roughly 0.45, and so roughly 20 % overshoot. Check it in the bench: set the gain for about 45° and read the overshoot.
+
+<QuickCheck client:idle id="qc-pm" question="A loop has a phase margin of 30°. Roughly what overshoot do you expect in the closed-loop step response?" options={[
+  { text: 'About 35 to 40 %', correct: true, why: 'ζ ≈ PM/100 = 0.3, and an overshoot exp(−πζ/√(1−ζ²)) for ζ = 0.3 is about 37 %.' },
+  { text: 'About 5 %', why: 'That would need ζ ≈ 0.7, so a phase margin of around 65 to 70°.' },
+  { text: 'None: 30° is still positive, so the loop is well damped', why: 'Positive margin means stable, not well damped. 30° gives roughly ζ = 0.3.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">4.4</span>Time delay</h2>
+
+Digital flight control computers, sensors and actuators all add delay. A pure delay <M t="e^{-\tau s}" /> has magnitude 1 at every frequency, so it does not move the magnitude plot at all, but it adds phase lag
+
+<Equation n="4.3" tex="\angle e^{-j\omega\tau} = -\omega\tau \ \text{rad}" />
+
+which grows without limit with frequency. At crossover it simply subtracts <M t="\omega_c\tau" /> from the phase margin. Add delay in the bench and watch the phase curve bend down at high frequency while the magnitude stays put. A fast loop, with high crossover frequency, is far more sensitive to delay than a slow one; this is one reason inner loops cannot be made arbitrarily fast.
+
+<QuickCheck client:idle id="qc-delay" question="A loop crosses over at 4 rad/s with 50° of phase margin. How much pure delay makes it unstable?" options={[
+  { text: 'About 0.22 s', correct: true, why: 'The delay must eat 50° = 0.87 rad at 4 rad/s: τ = 0.87/4 ≈ 0.22 s. The magnitude, and so the crossover, does not change.' },
+  { text: 'About 12.5 s', why: 'That divides 50 by 4 without converting degrees to radians.' },
+  { text: 'Delay cannot destabilise a loop with positive gain margin', why: 'Delay adds phase lag at every frequency, so it can remove all of the phase margin regardless of the gain margin.' }
+]} />
+
+<h2 class="sec" id="s5"><span class="n">4.5</span>Buying phase back with a lead compensator</h2>
+
+A lead compensator
+
+<Equation n="4.4" tex="C(s) = \frac{1 + s/\omega_z}{1 + s/\omega_p}, \qquad \omega_z < \omega_p" />
+
+adds positive phase between <M t="\omega_z" /> and <M t="\omega_p" />, most of it near their geometric mean. Placed near crossover it raises the phase margin, so the gain can be raised for a faster response without losing damping. The bench's lead has <M t="\omega_z = 2" /> and <M t="\omega_p = 20" /> rad/s: switch it on, then push the gain up and compare the response at the same phase margin with and without it. In root-locus terms, the lead's zero pulls the locus to the left, exactly as in lesson 3.
+
+<h2 class="sec" id="s6"><span class="n">4.6</span>In short</h2>
+
+- A Bode plot shows the open loop's gain and phase against frequency; stability depends on where gain 1 and phase −180° occur.
+- Phase margin is measured at gain crossover, gain margin at phase crossover; typical requirements are 45° and 6 dB.
+- <M t="\zeta \approx \text{PM}/100^\circ" /> links the margin to overshoot.
+- A delay leaves the magnitude unchanged and removes <M t="\omega_c\tau" /> of phase margin; a lead compensator adds phase near crossover.

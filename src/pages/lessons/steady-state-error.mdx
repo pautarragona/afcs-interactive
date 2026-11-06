@@ -1,0 +1,95 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Steady-state error
+description: "Exam core, lesson 2. Why some loops never quite reach their target, how many integrators a loop needs, and how to compute the error that remains."
+slug: steady-state-error
+---
+
+import SSELab from '../../components/labs/SSELab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Lesson 1 was about how a response gets somewhere. This one is about where it ends up. A feedback loop that settles is not necessarily on target, and whether it is depends on two things only: what kind of reference it has to follow, and how many integrators the loop contains.</p>
+
+By the end you should be able to:
+
+- compute the steady-state error of a unity feedback loop with the final value theorem;
+- classify a loop by its type and read off which references it follows without error;
+- use the error constants <M t="K_p" />, <M t="K_v" /> and <M t="K_a" /> in an exam question.
+
+<h2 class="sec" id="s1"><span class="n">2.1</span>The error of a feedback loop</h2>
+
+Take the standard unity feedback loop: the controller and aircraft together form the open-loop transfer function <M t="G(s)" />, and its output is fed back and subtracted from the reference <M t="r" />. The error <M t="e = r - y" /> then satisfies
+
+<Equation n="2.1" tex="E(s) = \frac{1}{1 + G(s)}\,R(s)" />
+
+If the closed loop is stable, the final value theorem from lesson C gives the error that remains:
+
+<Equation n="2.2" tex="e_{ss} = \lim_{s\to 0} s\,E(s) = \lim_{s\to 0}\frac{s\,R(s)}{1+G(s)}" />
+
+Everything in this lesson follows from (2.2).
+
+<h2 class="sec" id="s2"><span class="n">2.2</span>System type</h2>
+
+Near <M t="s = 0" /> only the lowest powers of <M t="s" /> in <M t="G" /> matter. Write the open loop as
+
+<Equation n="2.3" tex="G(s) = \frac{K\,(1 + b_1 s + \dots)}{s^N\,(1 + a_1 s + \dots)}" />
+
+The number of pure integrators <M t="N" /> is the **type** of the loop. A type 0 loop has none, type 1 has one, type 2 has two. Each integrator gives the loop memory: it keeps pushing for as long as any error remains, so the loop cannot settle while an error is left over.
+
+<h2 class="sec" id="s3"><span class="n">2.3</span>Three references, three constants</h2>
+
+Putting a step (<M t="R = 1/s" />), a ramp (<M t="R = 1/s^2" />) and a parabola (<M t="R = 1/s^3" />) into (2.2) gives
+
+<Equation n="2.4" tex="e_{ss,\,\text{step}} = \frac{1}{1 + K_p}, \qquad e_{ss,\,\text{ramp}} = \frac{1}{K_v}, \qquad e_{ss,\,\text{parabola}} = \frac{1}{K_a}" />
+
+with the error constants
+
+<Equation n="2.5" tex="K_p = \lim_{s\to 0} G(s), \qquad K_v = \lim_{s\to 0} s\,G(s), \qquad K_a = \lim_{s\to 0} s^2 G(s)" />
+
+Combined with the type, this gives the table every control exam asks about:
+
+<table class="data">
+<thead><tr><th>Type</th><th>Step</th><th>Ramp</th><th>Parabola</th></tr></thead>
+<tbody>
+<tr><td>0</td><td><M t="1/(1+K)" /></td><td><M t="\infty" /></td><td><M t="\infty" /></td></tr>
+<tr><td>1</td><td>0</td><td><M t="1/K" /></td><td><M t="\infty" /></td></tr>
+<tr><td>2</td><td>0</td><td>0</td><td><M t="1/K" /></td></tr>
+</tbody>
+</table>
+
+Here <M t="K" /> is the gain in the form (2.3), with the other factors written as <M t="1 + \dots" /> so that they equal 1 at <M t="s = 0" />. Each extra integrator removes the error for one more kind of reference.
+
+<div class="bench-wrap"><SSELab client:load /></div>
+
+Start with a type 1 loop following a ramp: the output runs parallel to the reference with a constant lag. Raise the gain and the lag shrinks as <M t="1/K_v" />, but the response also starts to ring. Push it towards the top of the range and the loop goes unstable, and from then on (2.4) means nothing. Then switch to type 2 and the ramp error disappears altogether, at the price of a slower, more oscillatory start.
+
+<QuickCheck client:idle id="qc-type" question="An open loop G(s) = 4 / (s(s + 2)) follows a ramp r(t) = t. What is the steady-state error?" options={[
+  { text: '0.5', correct: true, why: 'It is type 1, so Kv = lim s·G(s) = 4/2 = 2 and e_ss = 1/Kv = 0.5. The closed loop s² + 2s + 4 is stable, so the result is valid.' },
+  { text: '0.25', why: 'That uses K = 4 directly. Kv is the limit of s·G(s), which also divides by the constant 2 from (s + 2).' },
+  { text: '0', why: 'A type 1 loop follows a step without error, but a ramp leaves a constant error 1/Kv.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">2.4</span>The price of an integrator</h2>
+
+If integrators remove error, why not add as many as possible? Because each one adds 90° of phase lag at every frequency and puts a pole at the origin, dragging the closed-loop poles towards the right half-plane. The bench shows this in both type 1 and type 2: more integrators and more gain improve the steady state and degrade the transient. Lessons 3 and 4 give you the tools to see that trade-off before simulating: the root locus and the phase margin.
+
+The usual compromise in flight control is a proportional-integral controller, which adds one integrator with a zero close to it, so the integrator removes the steady error while the zero gives back most of the phase near crossover.
+
+<h2 class="sec" id="s5"><span class="n">2.5</span>In the aircraft</h2>
+
+Steady-state error decides which autopilot modes need an integrator. An altitude hold that must cancel a constant disturbance, such as a small trim change when fuel burns off, needs one, or it settles slightly off the selected altitude. A heading hold during a long turn sees a ramp in heading and needs enough type to follow it. A pitch rate damper (lesson 6), on the other hand, is meant to leave a steady-state error on purpose: it damps the motion without fighting the pilot's commands.
+
+<QuickCheck client:idle id="qc-dist" question="An altitude-hold loop without an integrator settles 15 m below the selected altitude after fuel burn changes the trim. What is the most direct fix?" options={[
+  { text: 'Add integral action to the loop', correct: true, why: 'A constant disturbance acts like a step; an integrator in the loop drives the resulting steady error to zero.' },
+  { text: 'Increase the proportional gain a lot', why: 'That shrinks the error but never removes it, and costs damping and stability margin.' },
+  { text: 'Add a derivative term', why: 'A derivative term reacts to rate of change and adds damping; it does nothing about a constant error.' }
+]} />
+
+<h2 class="sec" id="s6"><span class="n">2.6</span>In short</h2>
+
+- The steady-state error of a stable unity feedback loop follows from the final value theorem, (2.2).
+- The type of a loop is its number of pure integrators.
+- Step, ramp and parabola errors are <M t="1/(1+K_p)" />, <M t="1/K_v" /> and <M t="1/K_a" />; each extra integrator removes one of them.
+- More integrators and more gain improve the steady state but cost damping and stability; always check that the closed loop is stable first.

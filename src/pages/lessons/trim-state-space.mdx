@@ -1,0 +1,93 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Trim, linearisation and state space
+description: "Start here, lesson B. How a nonlinear aircraft becomes the linear state-space model every controller is designed on, and why the eigenvalues of A are the poles."
+slug: trim-state-space
+---
+
+import TrimLab from '../../components/labs/TrimLab.svelte';
+import StateLab from '../../components/labs/StateLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">An aircraft is a strongly nonlinear system, and yet nearly every flight controller is designed on a linear model. The trick is to pick one steady flight condition, describe only small deviations from it, and accept that the result is valid only nearby. This lesson walks through that recipe: trim, linearise, and read the state-space model that comes out.</p>
+
+By the end you should be able to:
+
+- explain what trimming an aircraft means and find a trim point for simple coefficient models;
+- linearise a nonlinear model about that point into <M t="\dot x = Ax + Bu" />;
+- connect the eigenvalues of <M t="A" /> to the poles of lessons C and 1.
+
+<h2 class="sec" id="s1"><span class="n">B.1</span>The nonlinear model</h2>
+
+Any dynamic model, however complicated, can be written as a set of first-order equations
+
+<Equation n="B.1" tex="\dot x = f(x, u), \qquad y = g(x, u)" />
+
+with a state vector <M t="x" /> (for the longitudinal aircraft: speed, angle of attack, pitch rate and pitch attitude), inputs <M t="u" /> (elevator and throttle) and outputs <M t="y" />. For an aircraft, <M t="f" /> contains the lift, drag, thrust, weight and pitching moment, all depending nonlinearly on speed and angle of attack.
+
+<h2 class="sec" id="s2"><span class="n">B.2</span>Trim: a flight condition that stays put</h2>
+
+A **trim point** <M t="(x_0, u_0)" /> is a combination of state and input for which nothing changes:
+
+<Equation n="B.2" tex="f(x_0, u_0) = 0" />
+
+For steady level flight that means lift equals weight, thrust equals drag, and the pitching moment about the centre of gravity is zero. With a lift coefficient linear in angle of attack and a pitching-moment coefficient linear in angle of attack and elevator, the first and last conditions give
+
+<Equation n="B.3" tex="C_L = \frac{2W}{\rho V^2 S} = C_{L_0} + C_{L_\alpha}\alpha, \qquad C_m = C_{m_0} + C_{m_\alpha}\alpha + C_{m_{\delta_e}}\delta_e = 0" />
+
+Two equations, two unknowns: the trim angle of attack and the trim elevator angle. The bench solves them for an illustrative aircraft at every airspeed.
+
+<div class="bench-wrap"><TrimLab client:load /></div>
+
+Two things to notice. Slower flight needs a higher lift coefficient, so a higher angle of attack, and the trim curve climbs steeply towards the stall at the low-speed end. And moving the centre of gravity aft makes <M t="C_{m_\alpha}" /> less negative, flattening the elevator curve: the aircraft needs less elevator to change speed, which pilots feel as lighter, more sensitive pitch control. Move it too far aft and <M t="C_{m_\alpha}" /> changes sign, which is static instability; the second bench shows what that does to the motion.
+
+<h2 class="sec" id="s3"><span class="n">B.3</span>Linearise around the trim point</h2>
+
+Close to the trim point, write <M t="x = x_0 + \Delta x" /> and <M t="u = u_0 + \Delta u" />, and expand <M t="f" /> in a first-order Taylor series. Because <M t="f(x_0,u_0) = 0" />, only the first-order terms remain:
+
+<Equation n="B.4" tex="\Delta\dot x = A\,\Delta x + B\,\Delta u, \qquad A = \left.\frac{\partial f}{\partial x}\right|_{0}, \quad B = \left.\frac{\partial f}{\partial u}\right|_{0}" />
+
+The entries of <M t="A" /> and <M t="B" /> are the **stability and control derivatives**: how much each force or moment changes per unit change of each state or input. They depend on the trim point, which is why a controller tuned at one speed may behave quite differently at another (lesson 11).
+
+The model is only valid for small deviations. How small depends on how curved <M t="f" /> is near the trim point: at a comfortable cruise angle of attack the lift curve is nearly straight and the model holds over several degrees; near the stall it bends sharply and the linear model fails almost at once.
+
+<QuickCheck client:idle id="qc-lin" question="Why does linearising about a trim point remove the constant term of the Taylor series?" options={[
+  { text: 'Because f(x₀, u₀) = 0 at a trim point', correct: true, why: 'Trim is defined by nothing changing, so the zeroth-order term of the expansion vanishes and only the derivatives remain.' },
+  { text: 'Because the deviations Δx are small', why: 'Small deviations justify dropping the second-order terms. The constant term disappears for a different reason: it is f at the trim point, which is zero by definition.' },
+  { text: 'Because the aircraft is symmetric', why: 'Symmetry decouples longitudinal from lateral motion, but it does not make f(x₀, u₀) zero. Trim does.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">B.4</span>The short-period model</h2>
+
+Keep only angle of attack and pitch rate, assume the speed stays constant for the few seconds that matter, and the longitudinal model shrinks to two states:
+
+<Equation n="B.5" tex="\begin{bmatrix}\dot\alpha\\ \dot q\end{bmatrix} = \begin{bmatrix} Z_\alpha & 1\\ M_\alpha & M_q\end{bmatrix}\begin{bmatrix}\alpha\\ q\end{bmatrix} + \begin{bmatrix} Z_{\delta}\\ M_{\delta}\end{bmatrix}\delta_e" />
+
+Each entry has a physical reading. <M t="Z_\alpha" /> is how quickly extra lift bends the flight path; <M t="M_\alpha" /> is static stability, the restoring pitching moment per unit angle of attack, and should be negative; <M t="M_q" /> is pitch damping, the moment that opposes rotation, mostly from the tailplane.
+
+<h2 class="sec" id="s5"><span class="n">B.5</span>Eigenvalues are poles</h2>
+
+The free motion of <M t="\dot x = Ax" /> is a sum of terms <M t="e^{\lambda t}" />, one for each eigenvalue <M t="\lambda" /> of <M t="A" />. The eigenvalues solve <M t="\det(\lambda I - A) = 0" />, which for (B.5) reads
+
+<Equation n="B.6" tex="\lambda^2 - (Z_\alpha + M_q)\,\lambda + (Z_\alpha M_q - M_\alpha) = 0" />
+
+That is exactly the denominator of the transfer function from elevator to any output, <M t="G(s) = C(sI - A)^{-1}B + D" />. So the eigenvalues of <M t="A" /> are the poles, and everything from lesson 1 applies: comparing (B.6) with <M t="s^2 + 2\zeta\omega_n s + \omega_n^2" /> gives <M t="\omega_n^2 = Z_\alpha M_q - M_\alpha" /> and <M t="2\zeta\omega_n = -(Z_\alpha + M_q)" />.
+
+<div class="bench-wrap"><StateLab client:load /></div>
+
+Make <M t="M_\alpha" /> less negative, which is what moving the centre of gravity aft does, and the eigenvalues slide towards each other, meet on the real axis and split. Once <M t="M_\alpha" /> exceeds <M t="Z_\alpha M_q" /> one of them crosses into the right half-plane and the gust grows instead of dying out. That is static instability, seen as an eigenvalue.
+
+<QuickCheck client:idle id="qc-eig" question="With Zα = −1.2 1/s and Mq = −1.0 1/s, at what value of Mα does the short period become unstable?" options={[
+  { text: 'Mα = +1.2 1/s²', correct: true, why: 'The constant term ZαMq − Mα must stay positive: 1.2 − Mα > 0, so instability starts at Mα = +1.2.' },
+  { text: 'Mα = 0', why: 'Zero static stability alone is not yet unstable here: ZαMq = 1.2 is still positive and keeps the constant term above zero.' },
+  { text: 'Mα = −2.2 1/s²', why: 'That is where −(Zα + Mq) appears, which is the damping term. Instability comes from the constant term changing sign.' }
+]} />
+
+<h2 class="sec" id="s6"><span class="n">B.6</span>In short</h2>
+
+- Trim is a flight condition where <M t="f(x_0,u_0) = 0" />: forces and moments balance.
+- Linearising about trim gives <M t="\Delta\dot x = A\Delta x + B\Delta u" />, valid only for small deviations.
+- The entries of <M t="A" /> and <M t="B" /> are stability and control derivatives, and they change with the flight condition.
+- The eigenvalues of <M t="A" /> are the poles of every transfer function of the model.

@@ -1,0 +1,103 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Laplace transforms and transfer functions
+description: "Start here, lesson C. Why engineers swap differential equations for transfer functions, what poles and zeros are, and what a single pole or zero does to a response."
+slug: laplace-transfer-functions
+---
+
+import LaplaceLab from '../../components/labs/LaplaceLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Every model in this course starts as a differential equation, and almost every design tool in it works on a transfer function instead. This lesson is the bridge: what the Laplace transform does, how a transfer function falls out of it, and how its poles and zeros already tell you what the response will look like.</p>
+
+By the end you should be able to:
+
+- turn a linear differential equation into a transfer function and back;
+- read the time constant of a first-order system from its pole;
+- predict what a zero does to a step response, including the strange case of a zero in the right half-plane;
+- use the final value theorem to find where a response ends up, without solving for it.
+
+<h2 class="sec" id="s1"><span class="n">C.1</span>Why transform at all</h2>
+
+Take the simplest dynamic system worth the name: something that relaxes towards its input, like a thermometer in a bath or an actuator chasing a command. With time constant <M t="\tau" />, input <M t="u(t)" /> and output <M t="y(t)" />,
+
+<Equation n="C.1" tex="\tau\,\dot y(t) + y(t) = u(t)" />
+
+Solving this for every input you might apply is tedious, and it gets much worse with three or four coupled equations. The Laplace transform replaces time functions <M t="f(t)" /> by functions of a complex variable <M t="s" />,
+
+<Equation n="C.2" tex="F(s) = \mathcal{L}\{f(t)\} = \int_0^\infty f(t)\,e^{-st}\,dt" />
+
+and its single most useful property is that differentiation becomes multiplication: if the system starts at rest, <M t="\mathcal{L}\{\dot y\} = s\,Y(s)" />. Calculus turns into algebra.
+
+<h2 class="sec" id="s2"><span class="n">C.2</span>The transfer function</h2>
+
+Transforming (C.1) with zero initial conditions gives <M t="\tau s\,Y(s) + Y(s) = U(s)" />, so the output is the input multiplied by a fixed function of <M t="s" />:
+
+<Equation n="C.3" tex="G(s) = \frac{Y(s)}{U(s)} = \frac{1}{\tau s + 1}" />
+
+That ratio is the transfer function. It describes the system completely, independently of any particular input, and it composes neatly: systems in series multiply, and a feedback loop becomes <M t="G/(1+GH)" />, as you will use from lesson 2 onwards.
+
+In general a transfer function is a ratio of two polynomials, <M t="G(s) = N(s)/D(s)" />. The roots of the denominator are the **poles**; the roots of the numerator are the **zeros**. For (C.3) there is one pole, at <M t="s = -1/\tau" />, and no zeros.
+
+<h2 class="sec" id="s3"><span class="n">C.3</span>One pole, one time constant</h2>
+
+The step response of (C.3) is <M t="y(t) = 1 - e^{-t/\tau}" />. After one time constant it has covered 63 % of the way, and after about four it is within 2 %. The pole sits at <M t="-1/\tau" />, so **the further left the pole, the faster the system**. Try it in the first mode of the bench: drag the pole and watch the 63 % marker follow it.
+
+<div class="bench-wrap"><LaplaceLab client:load /></div>
+
+<h2 class="sec" id="s4"><span class="n">C.4</span>What a zero does</h2>
+
+Now switch the bench to the second-order system with a zero. The poles are fixed at <M t="-1.2 \pm j1.6" /> (damping ratio 0.6, so on their own they overshoot by about 9.5 %), and the zero is yours to move. The numerator is scaled so the final value stays 1.
+
+A zero adds a scaled derivative of the response to itself. Written out, <M t="(s - z)/(-z)" /> times a response <M t="y_0" /> gives <M t="y_0 - \dot y_0 / z" />. With the zero in the left half-plane, <M t="z<0" />, that adds a positive multiple of the slope: the response is pushed forward and overshoots more, and the closer the zero comes to the origin, the bigger the push.
+
+Drag the zero across into the right half-plane and something odd happens: the response first goes the **wrong way** before turning round. Now the added slope term is negative. Such a zero is called non-minimum phase, and it is not a curiosity. An aircraft's altitude response to elevator has one: pull up and the tail is pushed down first, so for a moment the aircraft sinks before it climbs. Anything that controls altitude has to live with that delay.
+
+<QuickCheck client:idle id="qc-zero" question="A system has its poles well in the left half-plane and one zero at s = +2. What does its step response do first?" options={[
+  { text: 'Moves in the opposite direction to its final value', correct: true, why: 'A right half-plane zero subtracts a multiple of the slope, so the response initially heads the wrong way before the poles bring it round.' },
+  { text: 'Overshoots more than without the zero', why: 'That is what a left half-plane zero close to the origin does. In the right half-plane the sign of the derivative term flips.' },
+  { text: 'Becomes unstable', why: 'Stability depends only on the poles. Zeros change the shape of the response, never whether it settles.' }
+]} />
+
+<h2 class="sec" id="s5"><span class="n">C.5</span>Where does it end up? The final value theorem</h2>
+
+Often you only need the end of the story. If the response settles, its final value follows directly from the transform:
+
+<Equation n="C.4" tex="\lim_{t\to\infty} y(t) = \lim_{s\to 0} s\,Y(s)" />
+
+For a unit step, <M t="U(s) = 1/s" />, so <M t="Y(s) = G(s)/s" /> and the final value is simply <M t="G(0)" />, the DC gain. That is why the bench's systems all end at 1: their numerators were chosen to make <M t="G(0) = 1" />.
+
+The theorem has one catch: it only holds when the response actually settles, meaning all poles of <M t="sY(s)" /> are in the left half-plane. Applied to an unstable system it returns a number that means nothing. Always check the poles first. Lesson 2 uses this theorem to compute steady-state errors.
+
+<QuickCheck client:idle id="qc-fvt" question="What is the final value of the step response of G(s) = 6 / (s² + 5s + 3)?" options={[
+  { text: '2', correct: true, why: 'The poles are both in the left half-plane, so the theorem applies: G(0) = 6/3 = 2.' },
+  { text: '6', why: 'That is the numerator alone. The final value is G(0), the ratio of the constant terms: 6/3.' },
+  { text: 'It cannot be found without solving the differential equation', why: 'The final value theorem gives it directly, as long as the system is stable.' }
+]} />
+
+<h2 class="sec" id="s6"><span class="n">C.6</span>Reading a transfer function at a glance</h2>
+
+With these tools a transfer function can be read before anything is simulated:
+
+<table class="data">
+<thead><tr><th>Look at</th><th>Tells you</th></tr></thead>
+<tbody>
+<tr><td>Poles, real parts</td><td>Whether it is stable, and how fast it settles</td></tr>
+<tr><td>Poles, imaginary parts</td><td>Whether it oscillates, and how fast</td></tr>
+<tr><td>Zeros</td><td>How the shape is bent: extra overshoot, or a wrong-way start</td></tr>
+<tr><td><M t="G(0)" /></td><td>The final value of a unit step, if the system is stable</td></tr>
+<tr><td>Degree of denominator minus numerator</td><td>How sharply the response starts: one more pole than zeros means it starts with a slope, two means it starts flat</td></tr>
+</tbody>
+</table>
+
+Lesson 1 takes the second row much further, for the pair of complex poles that dominates most of flight dynamics.
+
+<h2 class="sec" id="s7"><span class="n">C.7</span>In short</h2>
+
+- The Laplace transform turns differentiation into multiplication by <M t="s" />, so linear differential equations become algebra.
+- A transfer function <M t="G(s) = N(s)/D(s)" /> is output over input; its poles are the roots of <M t="D" />, its zeros the roots of <M t="N" />.
+- A real pole at <M t="-1/\tau" /> means a time constant <M t="\tau" />: 63 % after <M t="\tau" />, within 2 % after about <M t="4\tau" />.
+- Zeros shape the response without changing stability; a right half-plane zero makes it start the wrong way.
+- For a stable system, the final value of a unit step response is <M t="G(0)" />.

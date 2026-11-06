@@ -1,0 +1,72 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Handling qualities
+description: "Exam core, lesson 7. Turning pilot opinion into numbers: the Control Anticipation Parameter, short-period damping limits and Gibson's dropback criterion."
+slug: handling-qualities
+---
+
+import HQLab from '../../components/labs/HQLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">A flight control system can be stable, well damped and fast, and still be disliked by every pilot who flies it. Handling qualities criteria try to capture what pilots find easy or hard in numbers an engineer can design to. This lesson covers the two you will use most for the short period: CAP with its damping limits, and Gibson's dropback.</p>
+
+By the end you should be able to:
+
+- explain what the Control Anticipation Parameter measures and compute it;
+- place a design on a CAP–damping chart and read off its level;
+- compute and interpret Gibson's dropback from the short-period parameters.
+
+<h2 class="sec" id="s1"><span class="n">7.1</span>Levels and pilot ratings</h2>
+
+Handling qualities are graded in three levels, tied to pilot opinion ratings on the Cooper–Harper scale. **Level 1** is clearly adequate for the task; **Level 2** means the task can be done but with increased pilot workload or reduced precision; **Level 3** means the aircraft can be controlled safely but the task suffers badly. Requirements also depend on the flight phase: category A covers rapid manoeuvring and precision tracking, B gradual manoeuvres such as climb and cruise, C terminal phases such as approach and landing.
+
+<h2 class="sec" id="s2"><span class="n">7.2</span>The Control Anticipation Parameter</h2>
+
+When a pilot pulls the stick, the first thing felt is the initial pitch acceleration; the thing that matters for the manoeuvre is the load factor that eventually builds up. CAP is the ratio between the two:
+
+<Equation n="7.1" tex="\text{CAP} = \frac{\dot q(0^+)}{\Delta n_{z,ss}} \approx \frac{\omega_{sp}^2}{n_z/\alpha}" />
+
+If CAP is too low, the initial response is weak compared with the final g, and the pilot tends to over-control; if it is too high, the aircraft feels abrupt and twitchy. The load factor per unit angle of attack follows from how quickly lift builds up after a change of attitude, which is described by the time constant <M t="T_{\theta_2}" />:
+
+<Equation n="7.2" tex="\frac{n_z}{\alpha} \approx \frac{V}{g\,T_{\theta_2}}" />
+
+The requirement combines CAP with short-period damping into a region. For category A in MIL-F-8785C, Level 1 is commonly quoted as <M t="0.28 \le \text{CAP} \le 3.6\ \text{g}^{-1}\text{s}^{-2}" /> together with <M t="0.35 \le \zeta_{sp} \le 1.30" />, with a wider Level 2 region around it. Check the exact boundaries your course uses against the course notes; the bench draws these.
+
+<div class="bench-wrap"><HQLab client:load /></div>
+
+Fly the dot around. Raising the airspeed raises <M t="n_z/\alpha" /> and lowers CAP at the same short-period frequency, which is why fast aircraft need a higher <M t="\omega_{sp}" />. Cutting the damping below 0.35 drops the design to Level 2 regardless of CAP.
+
+<QuickCheck client:idle id="qc-cap" question="A fighter at 200 m/s has Tθ2 = 1 s and a short-period frequency of 3 rad/s. What is its CAP?" options={[
+  { text: 'About 0.44 1/(g·s²)', correct: true, why: 'nz/α = 200/(9.81·1) ≈ 20.4 g/rad, so CAP = 9/20.4 ≈ 0.44, inside the commonly quoted category A Level 1 range.' },
+  { text: 'About 9 1/(g·s²)', why: 'That is ω² alone. CAP divides it by nz/α, which here is about 20 g/rad.' },
+  { text: 'About 0.15 1/(g·s²)', why: 'That would follow from using ω instead of ω²: 3/20.4.' }
+]} />
+
+<h2 class="sec" id="s3"><span class="n">7.3</span>Gibson's dropback</h2>
+
+CAP describes the start of a manoeuvre. Precision tracking also depends on how it ends. Hold the stick back, then let go: pitch rate stops, but the pitch attitude may continue to move or fall back, because of the lag between attitude and flight path. Gibson's dropback measures that, as the difference between the attitude at release and where it finally settles, relative to the steady pitch rate:
+
+<Equation n="7.3" tex="\frac{\text{DB}}{q_{ss}} = T_{\theta_2} - \frac{2\zeta_{sp}}{\omega_{sp}}" />
+
+A small positive dropback is generally acceptable or even preferred for tracking; a large dropback makes the nose bob back after every correction and feels imprecise; a negative value means the attitude keeps creeping on after release, which feels sluggish. Gibson's work gives detailed boundaries combining dropback with the pitch rate overshoot; use the ones from your course notes in the exercise.
+
+Watch the black attitude curve after the orange band in the bench: raise <M t="T_{\theta_2}" /> and the attitude visibly sinks back after release; raise damping or frequency and it settles where it was released.
+
+<QuickCheck client:idle id="qc-db" question="A design has Tθ2 = 1.0 s, ζsp = 0.5 and ωsp = 2 rad/s. What is its dropback per unit steady pitch rate?" options={[
+  { text: '0.5 s', correct: true, why: 'DB/qss = Tθ2 − 2ζ/ω = 1.0 − 2·0.5/2 = 0.5 s: the attitude falls back by half a second’s worth of pitch rate.' },
+  { text: '1.5 s', why: 'The damping term is subtracted, not added.' },
+  { text: '−0.5 s', why: 'Check the order: Tθ2 is 1.0 and 2ζ/ω is 0.5, so the result is positive.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">7.4</span>Where the control system comes in</h2>
+
+For a bare aircraft, <M t="\omega_{sp}" />, <M t="\zeta_{sp}" /> and <M t="T_{\theta_2}" /> are set by the airframe. A control system changes the first two directly (lesson 6 raised <M t="\zeta_{sp}" /> with a pitch damper), and with a command prefilter or more elaborate laws it reshapes the response the pilot sees. The AE4301 exercise asks for exactly this: design an inner loop so that the result satisfies CAP and Gibson criteria at the chosen flight condition.
+
+<h2 class="sec" id="s5"><span class="n">7.5</span>In short</h2>
+
+- Handling qualities are graded in Levels 1 to 3 and depend on the flight phase category.
+- <M t="\text{CAP} \approx \omega_{sp}^2/(n_z/\alpha)" /> with <M t="n_z/\alpha \approx V/(g T_{\theta_2})" />; it is combined with short-period damping limits.
+- Gibson's dropback, <M t="T_{\theta_2} - 2\zeta_{sp}/\omega_{sp}" />, describes how the attitude settles after the pilot stops pulling.
+- The control system's job is to move these numbers into the desired region.

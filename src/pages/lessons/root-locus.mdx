@@ -1,0 +1,85 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Root locus
+description: "Exam core, lesson 3. How the closed-loop poles move as the gain is raised, the rules for sketching that path by hand, and how to use it to pick a gain."
+slug: root-locus
+---
+
+import RootLocusLab from '../../components/labs/RootLocusLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Lesson 1 showed that the poles decide the response. A feedback controller is a way of moving them, and the simplest controller of all, a gain, moves them along a fixed path. That path is the root locus. Knowing its shape tells you, before any simulation, which responses a gain can and cannot give you.</p>
+
+By the end you should be able to:
+
+- explain where the root locus comes from and why it starts at the open-loop poles;
+- sketch a locus with the standard rules, including asymptotes and the imaginary-axis crossing;
+- read a suitable gain off a locus for a damping requirement, and predict what adding a pole or zero does.
+
+<h2 class="sec" id="s1"><span class="n">3.1</span>Where the closed-loop poles come from</h2>
+
+Close a unity feedback loop around <M t="K\,G(s)" />, with <M t="G = N/D" />. The closed-loop transfer function is <M t="KG/(1+KG)" />, so its poles are the roots of
+
+<Equation n="3.1" tex="1 + K\,G(s) = 0 \quad\Longleftrightarrow\quad D(s) + K\,N(s) = 0" />
+
+As <M t="K" /> runs from 0 to infinity, each root traces a curve in the s-plane. Together those curves are the root locus. At <M t="K = 0" /> the equation is just <M t="D(s) = 0" />, so **the locus starts at the open-loop poles**. As <M t="K" /> grows, <M t="N(s)" /> dominates, so **branches end at the open-loop zeros**, and branches without a zero to end at go off to infinity.
+
+<h2 class="sec" id="s2"><span class="n">3.2</span>Angle and magnitude</h2>
+
+Equation (3.1) says <M t="K G(s) = -1" />. Split into argument and size:
+
+<Equation n="3.2" tex="\angle G(s) = 180^\circ + k\cdot 360^\circ, \qquad K = \frac{1}{|G(s)|}" />
+
+The angle condition decides **where** the locus lies, independently of the gain. The magnitude condition then tells you **which gain** puts a closed-loop pole at a given point on it. Every sketching rule below is a consequence of the angle condition.
+
+<div class="bench-wrap"><RootLocusLab client:load /></div>
+
+Start with the three-pole case. Raise the gain slowly: two branches leave the real axis, bend towards the right, and cross the imaginary axis at the gain shown in the table. Then switch to two poles and a zero, and drag the zero: the branches now bend around it and stay in the left half-plane for every gain.
+
+<h2 class="sec" id="s3"><span class="n">3.3</span>Sketching rules</h2>
+
+For an open loop with <M t="n" /> poles and <M t="m" /> zeros:
+
+1. **Start and end.** <M t="n" /> branches start at the poles; <M t="m" /> end at the zeros; <M t="n - m" /> go to infinity.
+2. **Real axis.** A point on the real axis is on the locus if the total number of real poles and zeros to its right is odd.
+3. **Asymptotes.** The branches that go to infinity approach straight lines at angles <M t="(2k+1)\,180^\circ/(n-m)" />, all starting from the centroid
+<Equation n="3.3" tex="\sigma_a = \frac{\sum p_i - \sum z_j}{n - m}" />
+4. **Breakaway.** Where two real branches meet and leave the axis, the gain along the real axis has a local maximum; solve <M t="dK/ds = 0" /> with <M t="K = -D(s)/N(s)" />.
+5. **Imaginary-axis crossing.** Substitute <M t="s = j\omega" /> into <M t="D + KN = 0" /> and solve the real and imaginary parts, or use the Routh array, to find the critical gain and frequency.
+6. **Symmetry.** The locus is symmetric about the real axis.
+
+Apply them to <M t="G = 1/(s(s+2)(s+4))" />, the bench's three-pole case. The real axis between 0 and −2 and left of −4 is on the locus. Three branches go to infinity at 60°, 180° and 300° from <M t="\sigma_a = (0 - 2 - 4)/3 = -2" />. On the imaginary axis, <M t="-j\omega^3 - 6\omega^2 + 8j\omega + K = 0" /> gives <M t="\omega^2 = 8" /> and <M t="K = 6\cdot 8 = 48" />, the gain where the bench reports instability.
+
+<QuickCheck client:idle id="qc-asym" question="An open loop has poles at 0, −1 and −5 and no zeros. Where do its asymptotes start?" options={[
+  { text: 'At s = −2', correct: true, why: 'σa = (0 − 1 − 5)/3 = −2, with three asymptotes at 60°, 180° and 300°.' },
+  { text: 'At s = −3', why: 'That divides by two instead of n − m = 3.' },
+  { text: 'At the origin', why: 'Asymptotes start at the centroid of poles minus zeros, which here is −2.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">3.4</span>Choosing a gain</h2>
+
+A design requirement such as "damping ratio at least 0.6" is a pair of lines through the origin (lesson 1), drawn dashed in the bench. Where the locus crosses that line, the magnitude condition gives the gain. Every higher gain moves the dominant poles further from the real axis and lowers the damping; every lower gain makes the response slower. With the three-pole locus, try to find the gain that puts the dominant pair on the 0.6 line, then check the overshoot: it should be close to the 9.5 % that <M t="\zeta = 0.6" /> predicts, but not exactly, because the third pole still contributes.
+
+<h2 class="sec" id="s5"><span class="n">3.5</span>Adding poles and zeros</h2>
+
+The locus is a design tool because you can reshape it:
+
+- **adding a zero** pulls the locus towards it. With two poles and a zero, the branches curve round the zero and never reach the right half-plane. This is what a lead compensator or a rate feedback does;
+- **adding a pole** pushes the locus away, towards the right half-plane. Each extra pole, whether from an actuator, a filter or an integrator, costs stability margin.
+
+Drag the zero in the second preset closer to the origin and watch the circle it creates shrink; drag the third pole in the last preset further left and the critical gain rises, because a distant pole hardly bends the locus at all.
+
+<QuickCheck client:idle id="qc-add" question="A designer adds an actuator, modelled as a pole at −20, to a loop whose locus was safely in the left half-plane. What happens to the locus?" options={[
+  { text: 'It is pushed towards the right half-plane, mostly at high gains', correct: true, why: 'An extra pole adds one more asymptote and moves the centroid; far-away poles matter little at low gain but set where high-gain branches go.' },
+  { text: 'Nothing, because −20 is far away', why: 'At low gain a distant pole barely matters, but it changes the number and angle of the asymptotes, which decides the high-gain behaviour.' },
+  { text: 'It is pulled further left', why: 'That is what a zero does. Poles push the locus away from themselves.' }
+]} />
+
+<h2 class="sec" id="s6"><span class="n">3.6</span>In short</h2>
+
+- Closed-loop poles are the roots of <M t="D(s) + K N(s) = 0" />; as the gain rises they travel from the open-loop poles towards the zeros or infinity.
+- The angle condition fixes the shape of the locus; the magnitude condition fixes the gain at each point.
+- Real-axis segments, asymptotes, breakaway points and the imaginary-axis crossing are enough for a hand sketch.
+- Zeros pull the locus towards stability, extra poles push it away. Lesson 6 uses exactly this to design a pitch damper.

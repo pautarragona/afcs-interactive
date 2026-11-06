@@ -1,0 +1,72 @@
+---
+layout: ../../layouts/Lesson.astro
+title: Short period and phugoid
+description: "Exam core, lesson 5. The two longitudinal modes of an aircraft, what physically drives each one, and the approximations that predict their frequency and damping."
+slug: short-period-phugoid
+---
+
+import ModesLab from '../../components/labs/ModesLab.svelte';
+import QuickCheck from '../../components/QuickCheck.svelte';
+import Equation from '../../components/Equation.astro';
+import M from '../../components/M.astro';
+
+<p class="lede">Disturb an aircraft in pitch and it answers with two motions at once: a quick, well-damped nod of the nose that is over in a couple of seconds, and a slow exchange of speed and height that can last minutes. These are the short period and the phugoid. Almost every longitudinal flight control law is built around one of them.</p>
+
+By the end you should be able to:
+
+- describe both longitudinal modes physically, including which variables take part;
+- estimate short-period frequency and damping from the stability derivatives;
+- estimate the phugoid period and damping from airspeed and lift-to-drag ratio, and explain why it usually needs no automatic control.
+
+<h2 class="sec" id="s1"><span class="n">5.1</span>Four states, two modes</h2>
+
+The linearised longitudinal model of lesson B has four states: airspeed change <M t="u" />, angle of attack <M t="\alpha" />, pitch rate <M t="q" /> and pitch attitude <M t="\theta" />. Its <M t="4\times 4" /> state matrix has four eigenvalues, and for a conventional aircraft they come as two complex pairs that are far apart in the s-plane: one fast and fairly well damped, one slow and lightly damped. Because the frequencies differ by a factor of ten or more, each mode can be studied almost independently of the other.
+
+<h2 class="sec" id="s2"><span class="n">5.2</span>The short period</h2>
+
+The short period is a rotation about the centre of gravity at nearly constant speed. A gust raises the angle of attack, the tailplane produces a nose-down moment (static stability, <M t="M_\alpha < 0" />), the aircraft rotates back, overshoots a little, and the rotation is damped by the tailplane's opposition to pitching (<M t="M_q < 0" />). Speed hardly changes because it all happens in a second or two.
+
+Freezing speed gives the two-state model of lesson B, and with it the short-period approximation:
+
+<Equation n="5.1" tex="\omega_{sp}^2 = Z_\alpha M_q - M_\alpha, \qquad 2\zeta_{sp}\,\omega_{sp} = -(Z_\alpha + M_q)" />
+
+Static stability <M t="M_\alpha" /> mainly sets the frequency; pitch damping <M t="M_q" /> and the lift slope <M t="Z_\alpha" /> set the damping. The short period matters enormously to the pilot, because it is the aircraft's immediate answer to the stick. Lesson 7 is entirely about how it should feel.
+
+<h2 class="sec" id="s3"><span class="n">5.3</span>The phugoid</h2>
+
+The phugoid is the opposite: a slow oscillation at nearly constant angle of attack, in which the aircraft trades speed for height. Slow down, and lift falls below weight, so the aircraft descends and accelerates; the extra speed raises lift, so it climbs and slows again. Lanchester's classical energy argument, which neglects drag and the short period, gives
+
+<Equation n="5.2" tex="\omega_{ph} \approx \sqrt{2}\,\frac{g}{V}" />
+
+and adding drag gives a damping ratio inversely proportional to the aerodynamic efficiency:
+
+<Equation n="5.3" tex="\zeta_{ph} \approx \frac{1}{\sqrt{2}\,(L/D)}" />
+
+At 100 m/s that is a period of about 45 s, and with <M t="L/D = 12" /> a damping ratio of only 0.06. A clean, efficient aircraft has a poorly damped phugoid, but so slow that a pilot corrects it without noticing, which is why it rarely gets a dedicated control loop. An autopilot's altitude and speed holds (lesson 8) take care of it as a side effect.
+
+<div class="bench-wrap"><ModesLab client:load /></div>
+
+Two experiments. First, make <M t="M_\alpha" /> less negative, as an aft centre of gravity would: the short period slows down and, past the point found in lesson B, diverges. Second, raise the airspeed: the phugoid period grows in proportion, and raising <M t="L/D" /> makes it ring for longer, but its time scale stays in minutes whatever you do.
+
+<QuickCheck client:idle id="qc-ph" question="An aircraft flies at 150 m/s with L/D = 15. Roughly what is its phugoid period?" options={[
+  { text: 'About 68 s', correct: true, why: 'ω ≈ √2·9.81/150 = 0.092 rad/s, so the period is 2π/0.092 ≈ 68 s. The damping (ζ ≈ 0.05) barely changes it.' },
+  { text: 'About 2 s', why: 'That is the time scale of the short period, not the phugoid.' },
+  { text: 'About 680 s', why: 'Check the factor: ω = √2·g/V ≈ 0.092 rad/s, which gives a period of about 68 s.' }
+]} />
+
+<h2 class="sec" id="s4"><span class="n">5.4</span>Why the separation matters for control</h2>
+
+Because the two modes live on such different time scales, a control engineer can design for them one at a time. Inner loops (pitch rate and attitude) act at short-period speed and treat the airspeed as constant. Outer loops (altitude, speed, flight path) act at phugoid speed and treat the inner loop as already settled. That nested structure appears in every autopilot in lesson 8, and it works because of the gap you can see in this lesson's two time axes.
+
+<QuickCheck client:idle id="qc-sp" question="Moving the centre of gravity aft makes Mα less negative. What happens to the short period, according to (5.1)?" options={[
+  { text: 'Its frequency drops; far enough aft it becomes unstable', correct: true, why: 'ω² = ZαMq − Mα falls as Mα rises; once Mα exceeds ZαMq, ω² is negative and one eigenvalue crosses into the right half-plane.' },
+  { text: 'Its frequency rises', why: 'Mα enters (5.1) with a minus sign: a less negative Mα means a smaller ω².' },
+  { text: 'Only its damping changes', why: 'Mα does not appear in the damping term −(Zα + Mq), but it does set the frequency, which also changes ζ through the product 2ζω.' }
+]} />
+
+<h2 class="sec" id="s5"><span class="n">5.5</span>In short</h2>
+
+- Longitudinal motion has two modes: a fast short period (rotation at constant speed) and a slow phugoid (speed–height exchange at constant angle of attack).
+- Short period: <M t="\omega_{sp}^2 = Z_\alpha M_q - M_\alpha" />, <M t="2\zeta_{sp}\omega_{sp} = -(Z_\alpha + M_q)" />.
+- Phugoid: <M t="\omega_{ph} \approx \sqrt2\,g/V" />, <M t="\zeta_{ph} \approx 1/(\sqrt2\,L/D)" />: slow, lightly damped, easy for a pilot to correct.
+- The gap between the two time scales is what allows inner and outer control loops to be designed separately.

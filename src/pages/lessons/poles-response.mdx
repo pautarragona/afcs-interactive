@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Lesson.astro
 title: Poles decide how a system responds
-description: Lesson 1 of Interactive AFCS. Drag the poles of a second-order system and see how damping ratio, natural frequency, overshoot and settling time follow from where they sit.
+description: "Lesson 1 of Interactive AFCS. Drag the poles of a second-order system and see how damping ratio, natural frequency, overshoot and settling time follow from where they sit."
 slug: poles-response
 kicker: Exam core, lesson 1 of 8
 minutes: 20
@@ -106,7 +106,7 @@ Design rarely starts from poles. It starts from requirements: overshoot below so
 
 <SpecRegions n="1.4" />
 
-This picture is the bridge to everything that follows. In lesson 3 the root locus shows where a controller can move the poles, and the design question becomes whether that path passes through the allowed region.
+This picture is the bridge to everything that follows. In [lesson 3](../root-locus/) the root locus shows where a controller can move the poles, and the design question becomes whether that path passes through the allowed region.
 
 <h2 class="sec" id="s9"><span class="n">1.9</span>Challenge: meet the spec</h2>
 
@@ -137,5 +137,3 @@ You can check every number by dragging the bench's poles to <M t="-2 \pm j\,3" /
 - Its distance from the imaginary axis is the decay rate: it sets how fast the response settles.
 - Its angle from the negative real axis sets the damping ratio, <M t="\zeta = \cos\theta" />, and with it the overshoot.
 - Requirements on overshoot and settling time become a wedge and a vertical line in the s-plane, and a design must put its poles inside both.
-
-<p class="next">Next: lesson 2, steady-state error, is in preparation. <a href={import.meta.env.BASE_URL}>Back to the course overview</a></p>
