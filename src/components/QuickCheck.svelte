@@ -29,7 +29,8 @@
 
 <style>
   .qc { margin: 28px 0 0; max-width: var(--measure); border: 1.5px solid var(--frame); border-radius: var(--r-md); padding: 14px 18px 16px; background: var(--paper); box-shadow: var(--sheet-shadow); }
-  legend { padding: 0 6px; margin-left: -6px; font-family: var(--font-text); font-size: var(--text-size); }
+  legend { float: left; width: 100%; padding: 0; font-family: var(--font-text); font-size: var(--text-size); }
+  legend + * { clear: both; }
   .tag { display: block; font-family: var(--font-ui); font-size: 13px; color: var(--muted); }
   .opts { display: grid; gap: 8px; margin-top: 10px; }
   label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border: 1px solid var(--rule); border-radius: var(--r-sm); cursor: pointer; font-family: var(--font-text); font-size: 18px; transition: border-color 140ms var(--ease), background-color 140ms var(--ease); }

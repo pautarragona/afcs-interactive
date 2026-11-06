@@ -60,7 +60,7 @@ This explains the two dials. Turning the damping dial changes <M t="\theta" /> a
 
 <h2 class="sec" id="s4"><span class="n">1.4</span>What did you notice?</h2>
 
-<ObserveBox client:visible rubric={polesUp} />
+<ObserveBox client:idle rubric={polesUp} />
 
 <h2 class="sec" id="s5"><span class="n">1.5</span>From poles to the response</h2>
 
@@ -82,9 +82,9 @@ which comes from asking when the envelope <M t="e^{-\sigma t}" /> has fallen to 
 
 <h2 class="sec" id="s6"><span class="n">1.6</span>The other direction</h2>
 
-<ObserveBox client:visible rubric={polesLeft} />
+<ObserveBox client:idle rubric={polesLeft} />
 
-<QuickCheck client:visible id="qc-overshoot" question="You want less overshoot, but the settling time must stay the same. Where do you move the poles?" options={[
+<QuickCheck client:idle id="qc-overshoot" question="You want less overshoot, but the settling time must stay the same. Where do you move the poles?" options={[
   { text: 'Straight left, away from the imaginary axis', why: 'Moving left does cut the overshoot, but it also increases σ and so shortens the settling time. The requirement was to keep it the same.' },
   { text: 'Straight down, towards the real axis', correct: true, why: 'Keeping the real part fixed keeps σ, and so the settling time from (1.6), the same. Moving towards the real axis narrows θ, raising ζ and lowering the overshoot.' },
   { text: 'Along a ray away from the origin', why: 'A ray from the origin keeps θ, and so ζ and the overshoot, constant. It only makes everything faster.' }
@@ -94,7 +94,7 @@ which comes from asking when the envelope <M t="e^{-\sigma t}" /> has fallen to 
 
 So far the poles have stayed in the left half of the plane, where <M t="\sigma > 0" /> and the envelope <M t="e^{-\sigma t}" /> shrinks. Drag them across the imaginary axis and <M t="\sigma" /> turns negative: the same envelope now grows, and the response spirals away instead of settling. Exactly on the imaginary axis, <M t="\sigma = 0" />, the oscillation neither grows nor decays. That is marginal stability, which no flight control system should rely on.
 
-<QuickCheck client:visible id="qc-stability" question="A pair of poles sits at 0.3 ± j2. What does the step response do?" options={[
+<QuickCheck client:idle id="qc-stability" question="A pair of poles sits at 0.3 ± j2. What does the step response do?" options={[
   { text: 'It oscillates with a slowly growing amplitude', correct: true, why: 'The real part is positive, so σ = −0.3 and the envelope e^(0.3t) grows. The height of 2 rad/s sets how fast it oscillates while doing so.' },
   { text: 'It settles slowly, because 0.3 is small', why: 'Only poles with a negative real part settle. A small positive real part means the growth is slow, but it is still growth.' },
   { text: 'It oscillates forever at constant amplitude', why: 'That happens only for poles exactly on the imaginary axis, with real part zero.' }
@@ -110,7 +110,7 @@ This picture is the bridge to everything that follows. In lesson 3 the root locu
 
 <h2 class="sec" id="s9"><span class="n">1.9</span>Challenge: meet the spec</h2>
 
-<Challenge client:visible />
+<Challenge client:idle />
 
 <h2 class="sec" id="s10"><span class="n">1.10</span>Back to the aircraft</h2>
 
